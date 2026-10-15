@@ -82,7 +82,7 @@ pre{font-family:var(--mono);background:#0c0c0c;border:1px solid var(--rule);bord
 #tier{background:transparent;color:var(--fg);border:1px solid #3a3a3a;border-radius:4px;height:32px;padding:0 8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer}#tier:hover{border-color:#555}
 .dots::after{content:"…";animation:b 1s infinite}@keyframes b{50%{opacity:.2}}
 </style></head><body>
-<style>.bub.md{white-space:normal}@media(max-width:640px){header{padding:10px 12px;flex-wrap:wrap}.badge{display:none}}</style>
+<style>.bub.md{white-space:normal}.foot{width:100%}@media(max-width:640px){header{padding:10px 12px;flex-wrap:wrap}.badge{display:none}}</style>
 </head><body>
 <main><header><img class="logo" src="favicon.svg" alt="WrenbyAI"><h1>WrenbyAI</h1><span class="badge">chat</span><span id="status">Ready</span><select id="tier" title="Output length and memory"><option value="spark">Spark · 6k</option><option value="turbo">Turbo · 24k</option><option value="forge">Forge · 48k</option><option value="zenith">Zenith · 72k</option></select><span id="tierhint"></span><button id="reset">New chat</button></header>
 <div id="log"></div>
