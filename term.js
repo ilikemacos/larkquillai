@@ -1,11 +1,13 @@
 // VS Code-style bottom panel: explorer + xterm shell over the virtual filesystem.
 import { vfs, resolve, downloadText, zipFiles, runAgent, IDENTITY } from "./core.js";
+import { authInfo } from "./auth.js";
 const PY_BASE = "https://preset-ai-chat.vercel.app/pyodide/";
 let term, fit, cwd = "/", line = "", cur = 0, hist = [], hi = 0, busy = null, opened = false, ui = {};
 const C = { dim: s => `\x1b[2m${s}\x1b[0m`, acc: s => `\x1b[38;2;255;106;43m${s}\x1b[0m`, err: s => `\x1b[38;2;224;106;90m${s}\x1b[0m`, dir: s => `\x1b[38;2;130;170;255m${s}\x1b[0m` };
 const out = s => term.write(String(s).replace(/\r?\n/g, "\r\n"));
 const outln = s => out(s + "\n");
-const prompt = () => { term.write("\r\n" + C.acc("wrenby") + " " + C.dir(cwd) + " $ "); line = ""; cur = 0; };
+const tag = () => sbx ? C.acc("wrenby") + C.dim("@cloud") + " " + C.dir(sbx.cwd) : C.acc("wrenby") + " " + C.dir(cwd);
+const prompt = () => { term.write("\r\n" + tag() + " $ "); line = ""; cur = 0; };
 function args(s) { const a = []; let m; const re = /"((?:\\.|[^"\\])*)"|'([^']*)'|(\S+)/g; while ((m = re.exec(s))) a.push(m[1] != null ? m[1].replace(/\\(.)/g, "$1") : m[2] != null ? m[2] : m[3]); return a; }
 const HELP = `Commands
   ls [dir]  cd <dir>  pwd  cat <file>  mkdir [-p] <dir>  rm [-r] <path>
@@ -14,8 +16,30 @@ const HELP = `Commands
   node <file.js>      run JavaScript in a sandboxed worker
   python <file.py>    run Python in the browser (loads on first use)
   wrenby "<prompt>"   ask WrenbyAI; files it creates land in this folder
+  cloud / local       switch between the real cloud sandbox (signed in) and browser files
 Keys: Up/Down history, Tab completes, Ctrl+C cancels, Ctrl+L clears.`;
+// ---------- cloud sandbox (signed-in users) ----------
+let sbx = null, wantCloud = true; const SK = "wy.sbx";
+async function sapi(body, signal) { const a = authInfo(); if (!a.user || !a.token) throw new Error("not signed in");
+  const r = await fetch(a.base + "/api/sandbox", { method: "POST", signal, headers: { "content-type": "application/json", authorization: "Bearer " + a.token }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({})); if (!r.ok) { const e = new Error(j.error || "HTTP " + r.status); e.status = r.status; throw e; } return j; }
+async function cloudStart(quiet) { if (!authInfo().user) { if (!quiet) outln(C.dim("sign in to use the cloud sandbox; using the browser workspace")); return false; }
+  if (!quiet) out(C.dim("connecting to cloud sandbox…"));
+  try { const j = await sapi({ action: "start", id: sessionStorage.getItem(SK) || undefined }); sbx = { id: j.id, cwd: sbx?.id === j.id ? sbx.cwd : j.cwd }; sessionStorage.setItem(SK, j.id);
+    out("\r\x1b[K"); outln(C.acc("● Connected to cloud sandbox") + C.dim("  ·  real Linux shell  ·  type local to switch to browser files")); return true; }
+  catch (e) { sbx = null; out("\r\x1b[K"); outln(C.err("cloud sandbox unavailable (" + e.message + "); using the browser workspace")); return false; } }
+async function cloudExec(raw) { const ac = new AbortController(); busy = { cancel: () => ac.abort() };
+  try { let j; try { j = await sapi({ action: "exec", id: sbx.id, cmd: raw, cwd: sbx.cwd }, ac.signal); }
+    catch (e) { if (e.status === 410) { sessionStorage.removeItem(SK); outln(C.dim("sandbox expired, starting a new one")); if (!(await cloudStart(true))) throw e; j = await sapi({ action: "exec", id: sbx.id, cmd: raw, cwd: sbx.cwd }, ac.signal); } else throw e; }
+    if (j.stdout) out(j.stdout.replace(/\n$/, "") + "\n"); if (j.stderr) out(C.err(j.stderr.replace(/\n$/, "")) + "\n"); sbx.cwd = j.cwd || sbx.cwd;
+  } catch (e) { if (e.name === "AbortError") return outln(C.dim("cancelled")); sbx = null; outln(C.err("cloud sandbox error: " + e.message) + C.dim("  ·  back to the browser workspace (type cloud to retry)")); } }
 async function exec(raw) {
+  { const c0 = raw.trim().split(/\s+/)[0];
+    if (c0 === "local") { sbx = null; wantCloud = false; return outln(C.dim("using the browser workspace (type cloud for the real sandbox)")); }
+    if (c0 === "cloud") { wantCloud = true; await cloudStart(false); return; }
+    if (c0 === "clear") return term.clear();
+    if (!sbx && wantCloud && authInfo().user && !["help", "wrenby", "download", "zip", "upload"].includes(c0)) await cloudStart(false);
+    if (sbx && !["help", "wrenby", "download", "zip", "upload"].includes(c0)) return cloudExec(raw); }
   let redir = null; const rm = raw.match(/^(echo\b.*?)\s(>>?)\s*(\S+)\s*$/); if (rm) { raw = rm[1]; redir = { app: rm[2] === ">>", file: rm[3] }; }
   const [cmd, ...a] = args(raw); if (!cmd) return; const P = p => resolve(cwd, p);
   switch (cmd) {
@@ -68,7 +92,7 @@ async function ask(q) { if (!q) throw new Error('usage: wrenby "<prompt>"'); con
 function complete() { const parts = line.slice(0, cur).split(" "); const w = parts.pop(); const slash = w.lastIndexOf("/"); const dir = resolve(cwd, slash >= 0 ? w.slice(0, slash + 1) || "/" : "."), pre = w.slice(slash + 1);
   let l; try { l = vfs.list(dir); } catch { return; } const m = l.filter(([n]) => n.startsWith(pre)); if (m.length !== 1) { if (m.length > 1) { out("\r\n" + m.map(x => x[0]).join("  ")); const keep = line, c = cur; prompt(); line = keep; cur = c; term.write(line); } return; }
   const add = m[0][0].slice(pre.length) + (m[0][1] === "d" ? "/" : " "); line = line.slice(0, cur) + add + line.slice(cur); cur += add.length; term.write(add); }
-function redraw() { term.write("\x1b[2K\r" + C.acc("wrenby") + " " + C.dir(cwd) + " $ " + line); const back = line.length - cur; if (back > 0) term.write(`\x1b[${back}D`); }
+function redraw() { term.write("\x1b[2K\r" + tag() + " $ " + line); const back = line.length - cur; if (back > 0) term.write(`\x1b[${back}D`); }
 async function onData(d) {
   if (busy) { if (d === "\x03") { busy.cancel(); out("^C"); } return; }
   if (d === "\r") { const cmd = line.trim(); term.write("\r\n"); if (cmd) { hist.push(cmd); hi = hist.length; busy = { cancel() {} }; try { await exec(cmd); } catch (e) { outln(C.err(e.message || e)); } busy = null; } prompt(); return; }
@@ -88,6 +112,7 @@ export function toggleTerminal(force) { const panel = ui.panel, show = force ?? 
   if (show && !opened) { opened = true; term = new window.Terminal({ fontFamily: '"JetBrains Mono", ui-monospace, Menlo, monospace', fontSize: 13, cursorBlink: true, convertEol: false,
       theme: { background: "#0c0c0c", foreground: "#ececec", cursor: "#ff6a2b", selectionBackground: "#3a3a3a", black: "#111111", blue: "#82aaff", brightBlack: "#6a6a6a" } });
     fit = new window.FitAddon.FitAddon(); term.loadAddon(fit); term.open(ui.host); term.onData(onData); new ResizeObserver(() => { try { fit.fit(); } catch {} }).observe(ui.host);
-    outln(C.acc("WrenbyAI terminal") + C.dim("  ·  type help  ·  files are saved in this browser")); prompt(); }
+    outln(C.acc("WrenbyAI terminal") + C.dim("  ·  type help  ·  files are saved in this browser"));
+    if (authInfo().user) { busy = { cancel() {} }; cloudStart(false).finally(() => { busy = null; prompt(); }); } else prompt(); }
   if (show) setTimeout(() => { try { fit.fit(); } catch {} term.focus(); }, 30); return show; }
 export const termRun = async cmd => { toggleTerminal(true); for (const ch of cmd) await onData(ch); await onData("\r"); };
