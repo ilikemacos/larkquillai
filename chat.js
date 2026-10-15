@@ -2,6 +2,8 @@ import { marked } from "./md/marked.esm.js";
 import DOMPurify from "./md/purify.es.mjs";
 import { vfs, runAgent, fencedFiles, langOf, fmtSize, downloadText, zipFiles, IDENTITY, norm } from "./core.js";
 import { initTerminal, toggleTerminal } from "./term.js";
+import { initAuth } from "./auth.js";
+let session = null;
 const $ = s => document.querySelector(s), log = $("#log"), q = $("#q"), send = $("#send"), status = $("#status");
 marked.setOptions({ gfm: true, breaks: true });
 const SYS = `You are WrenbyAI, a friendly, coding-first AI assistant. Help with code, questions and anything else. Use markdown and keep prose short. Use web search for anything current and cite sources as [title](url); don't invent URLs.
@@ -64,12 +66,20 @@ async function ask(text) {
     endThink(); content = r.text; md(out, content || (r.files.length ? "" : "_(no reply)_"), true);
     const fenced = fencedFiles(content).map(f => { if (!/^snippet-/.test(f.name)) vfs.write(norm(f.name), f.content); return { name: norm(f.name), content: f.content }; });
     showFiles(bub, [...r.files, ...fenced]);
+    const allFiles = [...r.files, ...fenced.filter(f => !r.files.some(x => x.name === f.name))];
+    if (session) session.saveTurn({ user: text, assistant: content, files: allFiles.length ? allFiles : null, mode: tier }).catch(() => {});
     history.push({ role: "assistant", content: content + (r.files.length ? "\n\n[Created files: " + r.files.map(f => f.name).join(", ") + "]" : "") });
   } catch (e) { endThink(); if (e.name === "AbortError") { md(out, (content ? content + "\n\n" : "") + "_Stopped._", true); if (content) history.push({ role: "assistant", content }); }
     else { history.pop(); const w = document.createElement("div"); w.className = "warn"; w.textContent = "Couldn't reach WrenbyAI: " + e.message; out.appendChild(w); } }
   busy = false; ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); }
 $("#f").onsubmit = e => { e.preventDefault(); if (busy) { ctrl?.abort(); return; } const t = q.value.trim(); if (!t) return; q.value = ""; ask(t); };
-$("#reset").onclick = () => { ctrl?.abort(); history = []; log.innerHTML = ""; closeViewer(); hello(); };
+const freshChat = () => { ctrl?.abort(); history = []; log.innerHTML = ""; closeViewer(); };
+$("#reset").onclick = () => { freshChat(); hello(); session?.startNewChat(); };
+function loadConversation(msgs) { freshChat(); for (const m of msgs || []) { const c = String(m.content || "");
+    if (m.role === "user") { add("u", c); history.push({ role: "user", content: c }); }
+    else if (m.role === "assistant") { const b = add("a", c); if (Array.isArray(m.files) && m.files.length) showFiles(b, m.files.filter(f => f && f.name && typeof f.content === "string")); history.push({ role: "assistant", content: c }); } }
+  if (!log.children.length) hello(); }
+initAuth({ base: "https://preset-ai-chat.vercel.app", getMode: () => tier, onNewChat: () => { freshChat(); hello(); }, onLoadChat: msgs => loadConversation(msgs) }).then(s => session = s).catch(e => console.warn("auth init failed", e));
 // ---------- terminal panel ----------
 const ufile = $("#ufile");
 ufile.onchange = async () => { for (const f of ufile.files) vfs.write("/" + f.name, await f.text()); ufile.value = ""; };
