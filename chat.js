@@ -2,7 +2,8 @@ import { marked } from "./md/marked.esm.js";
 import DOMPurify from "./md/purify.es.mjs";
 import { vfs, runAgent, fencedFiles, langOf, fmtSize, downloadText, zipFiles, IDENTITY, norm } from "./core.js";
 import { initTerminal, toggleTerminal } from "./term.js";
-import { initAuth } from "./auth.js";
+import { initAuth, authInfo } from "./auth.js";
+import { runCloudTask, classifyRemote, LOOSE } from "./cloudtask.js";
 let session = null;
 const $ = s => document.querySelector(s), log = $("#log"), q = $("#q"), send = $("#send"), status = $("#status");
 marked.setOptions({ gfm: true, breaks: true });
@@ -57,6 +58,14 @@ async function ask(text) {
   history.push({ role: "user", content: text }); ctrl = new AbortController();
   let content = "", reasoning = "", thinkDone = false; const endThink = () => { if (!thinkDone) { thinkDone = true; th.done(); } };
   try {
+    if ((tier === "forge" || tier === "zenith") && LOOSE.test(text)) {
+      if (authInfo().user) { const ct = await runCloudTask(bub, text, tier, { signal: ctrl.signal, onStatus: s => status.textContent = s }).catch(e => { if (e.name === "AbortError") throw e; const w = document.createElement("div"); w.className = "warn"; w.textContent = "Cloud sandbox unavailable (" + e.message + "), answering in chat instead."; bub.appendChild(w); return null; });
+        if (ct) { endThink(); md(out, ct.summary || (ct.status === "done" ? "Done." : "_" + ct.status + "_"), true); ct.files.forEach(f => vfs.write(norm(f.name), f.content)); showFiles(bub, ct.files);
+          const reply = (ct.summary || "") + (ct.files.length ? "\n\n[Created files in cloud sandbox: " + ct.files.map(f => f.name).join(", ") + "]" : "");
+          if (session) session.saveTurn({ user: text, assistant: reply, files: ct.files.length ? ct.files : null, mode: tier }).catch(() => {});
+          history.push({ role: "assistant", content: reply }); busy = false; ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); return; } }
+      else classifyRemote(text, tier).then(c => { if (c.hard) { const h = document.createElement("div"); h.className = "warn"; h.textContent = "Sign in to run this in a cloud sandbox (real install, build and test)."; bub.appendChild(h); } }).catch(() => {});
+    }
     const r = await runAgent([{ role: "system", content: SYS }, ...history.slice(-40)], { tier, maxTokens: MAXT[tier], signal: ctrl.signal,
       on: { search: j => (th.toWeb(), 0) || step(th, "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s")),
         reasoning: rs => { reasoning = rs; th.reason.hidden = false; md(th.reason, rs); },
