@@ -29,3 +29,19 @@ wrenby
 - In a session, `/clear` forgets the conversation and `/exit` quits.
 
 This package isn't published to npm.
+
+## Desktop app (Windows and macOS)
+
+macOS (Terminal):
+
+```sh
+curl -fsSL https://ilikemacos.github.io/wrenbyai/install.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://ilikemacos.github.io/wrenbyai/install.ps1 | iex
+```
+
+Both scripts pick the latest release from [ilikemacos/wyneai-desktop](https://github.com/ilikemacos/wyneai-desktop/releases/latest). The app updates itself on launch.
