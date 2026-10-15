@@ -17,16 +17,18 @@ function add(who, text) { const d = document.createElement("div"); d.className =
   d.innerHTML = `<div class="av">${who === "u" ? "You" : '<img src="favicon.svg" alt="WrenbyAI" style="width:24px;height:24px;border-radius:5px">'}</div><div class="bub"></div>`;
   log.appendChild(d); const b = d.querySelector(".bub"); if (text != null) { if (who === "u") b.textContent = text; else md(b, text, true); } log.scrollTop = 1e9; return b; }
 const hello = () => add("a", "Hi, I'm WrenbyAI. Ask me anything, or tell me what we're building.");
+const MASCOT = '<span class="wl">you</span><div class="mtrack" data-dir="left"><svg class="mob" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><g class="bob"><g class="mbody"><rect class="skin" x="3" y="2" width="10" height="9"></rect><rect class="eye" x="8" y="4" width="2" height="2"></rect><rect class="eye" x="11" y="4" width="1" height="2"></rect></g><rect class="leg l1" x="4" y="11" width="3" height="3"></rect><rect class="leg l2" x="9" y="11" width="3" height="3"></rect></g></svg></div><span class="wl">web</span>';
 function thinkBox(bub) { const t = document.createElement("details"); t.className = "think";
   t.innerHTML = '<summary><span class="tdot"></span><span class="tlabel">Thinking</span><span class="ttime"></span><span class="tchev">▾</span></summary><div class="steps"></div><div class="treason md" hidden></div>';
+  t.open = true; const walk = document.createElement("div"); walk.className = "walk"; walk.innerHTML = MASCOT; t.appendChild(walk); const mtrack = walk.querySelector(".mtrack"); let dirT = null, ans = false;
   bub.appendChild(t); const t0 = Date.now(), tm = t.querySelector(".ttime"), iv = setInterval(() => tm.textContent = Math.round((Date.now() - t0) / 1000) + "s", 500);
-  return { el: t, steps: t.querySelector(".steps"), reason: t.querySelector(".treason"),
-    done() { clearInterval(iv); t.classList.add("done"); t.querySelector(".tlabel").textContent = "Thought for " + Math.max(1, Math.round((Date.now() - t0) / 1000)) + "s"; tm.textContent = ""; } }; }
+  return { el: t, toWeb() { clearTimeout(dirT); mtrack.dataset.dir = "right"; dirT = setTimeout(() => { if (!ans) mtrack.dataset.dir = "left"; }, 1800); }, steps: t.querySelector(".steps"), reason: t.querySelector(".treason"),
+    done() { ans = true; clearInterval(iv); t.classList.add("done"); t.open = false; t.querySelector(".tlabel").textContent = "Thought for " + Math.max(1, Math.round((Date.now() - t0) / 1000)) + "s"; tm.textContent = ""; } }; }
 async function ask(text) {
   busy = true; send.textContent = "Stop"; status.textContent = "Thinking…"; add("u", text);
   const bub = add("a"); const th = thinkBox(bub); const out = document.createElement("div"); bub.appendChild(out);
   history.push({ role: "user", content: text }); ctrl = new AbortController();
-  let content = "", reasoning = "", thinkDone = false; const endThink = () => { if (!thinkDone) { thinkDone = true; th.done(); if (!reasoning && !th.steps.children.length) th.el.remove(); } };
+  let content = "", reasoning = "", thinkDone = false; const endThink = () => { if (!thinkDone) { thinkDone = true; th.done(); } };
   try {
     const res = await fetch(API, { method: "POST", signal: ctrl.signal, headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: [{ role: "system", content: SYS }, ...history.slice(-40)], max_tokens: MAXT[tier], tier }) });
     if (!res.ok) { let m = res.status; try { m = (await res.json()).error || m; } catch {} throw new Error(res.status === 429 ? "You're sending messages too fast. Try again in a minute." : String(m)); }
@@ -34,7 +36,7 @@ async function ask(text) {
     for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i;
       while ((i = buf.indexOf("\n\n")) >= 0) { const ev = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!ev.startsWith("data:")) continue; const d = ev.slice(5).trim(); if (d === "[DONE]") continue;
         let j; try { j = JSON.parse(d); } catch { continue; }
-        if (j.type === "search") { const s = document.createElement("div"); s.className = "step"; s.textContent = "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s"); th.steps.appendChild(s); continue; }
+        if (j.type === "search") { th.toWeb(); const s = document.createElement("div"); s.className = "step"; s.textContent = "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s"); th.steps.appendChild(s); continue; }
         if (j.reasoning) { reasoning += j.reasoning; th.reason.hidden = false; md(th.reason, reasoning); }
         if (j.content) { endThink(); status.textContent = "Writing…"; content += j.content; md(out, content); } } }
     endThink(); md(out, content || "_(no reply)_", true); history.push({ role: "assistant", content });
