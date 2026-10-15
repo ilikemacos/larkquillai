@@ -4,6 +4,7 @@ import { vfs, runAgent, fencedFiles, langOf, fmtSize, downloadText, zipFiles, ID
 import { initTerminal, toggleTerminal } from "./term.js";
 import { initAuth, authInfo } from "./auth.js";
 import { runCloudTask, classifyRemote, LOOSE } from "./cloudtask.js";
+import { applyTheme } from "./theme.js";
 let session = null;
 const $ = s => document.querySelector(s), log = $("#log"), q = $("#q"), send = $("#send"), status = $("#status");
 marked.setOptions({ gfm: true, breaks: true });
@@ -97,4 +98,4 @@ $("#tbtn").onclick = () => toggleTerminal(); $("#pclose").onclick = () => { togg
 $("#zipws").onclick = () => { const fs = [...vfs.files.keys()]; if (fs.length) zipFiles(fs.map(p => ({ name: p, content: vfs.read(p) })), "workspace.zip"); };
 addEventListener("keydown", e => { if (e.ctrlKey && (e.key === "`" || e.code === "Backquote")) { e.preventDefault(); if (!toggleTerminal()) q.focus(); }
   else if (e.key === "Escape" && !viewer.hidden) { e.preventDefault(); closeViewer(); } });
-vfs.load(); hello(); q.focus();
+applyTheme(); vfs.load(); hello(); q.focus();
