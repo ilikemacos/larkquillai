@@ -1,13 +1,17 @@
 import { marked } from "./md/marked.esm.js";
 import DOMPurify from "./md/purify.es.mjs";
-const API = "https://preset-ai-chat.vercel.app/api/chat";
+import { vfs, runAgent, fencedFiles, langOf, fmtSize, downloadText, zipFiles, IDENTITY, norm } from "./core.js";
+import { initTerminal, toggleTerminal } from "./term.js";
 const $ = s => document.querySelector(s), log = $("#log"), q = $("#q"), send = $("#send"), status = $("#status");
 marked.setOptions({ gfm: true, breaks: true });
-const SYS = "You are WrenbyAI, a friendly, coding-first AI assistant. Help with code, questions and anything else. Use markdown (headings, lists, tables, fenced code blocks with a language). Keep prose short. Use web search for anything current and cite sources as [title](url). Don't invent URLs. Never name or hint at the underlying model or provider; if asked, you are WrenbyAI.";
+const SYS = `You are WrenbyAI, a friendly, coding-first AI assistant. Help with code, questions and anything else. Use markdown and keep prose short. Use web search for anything current and cite sources as [title](url); don't invent URLs.
+Files: when the user asks you to make a file, script, page or project, call the create_file tool once per file with the COMPLETE content (no placeholders). The user gets a download card for each file and the files also appear in their terminal workspace. Don't repeat the file contents in your reply; just say briefly what you made. Short examples can go in fenced code blocks; put the filename after the language when it is a file, like \`\`\`js app.js. ${IDENTITY}`;
 let history = [], busy = false, ctrl = null, tier = localStorage.getItem("wrenby-tier") || "spark";
 const tsel = $("#tier"); tsel.value = tier; const hint = () => $("#tierhint").textContent = tier === "zenith" ? "uses the most usage" : "";
 tsel.onchange = () => { tier = tsel.value; localStorage.setItem("wrenby-tier", tier); hint(); }; hint();
 const MAXT = { spark: 6144, turbo: 24576, forge: 49152, zenith: 73728 };
+const hl = (code, name) => { if (!window.hljs) return; const e = (name.split(".").pop() || "").toLowerCase(); const l = { js: "javascript", mjs: "javascript", py: "python", ts: "typescript", sh: "bash", htm: "html", html: "xml", md: "markdown", yml: "yaml", rs: "rust" }[e] || e;
+  try { code.innerHTML = hljs.getLanguage(l) ? hljs.highlight(code.textContent, { language: l }).value : hljs.highlightAuto(code.textContent).value; } catch {} };
 function enhance(el) { el.querySelectorAll("pre").forEach(pre => { const code = pre.querySelector("code"); if (code && window.hljs) try { hljs.highlightElement(code); } catch {}
   const b = document.createElement("button"); b.className = "codecopy"; b.type = "button"; b.textContent = "Copy";
   b.onclick = async () => { try { await navigator.clipboard.writeText(code ? code.innerText : pre.innerText); b.textContent = "Copied"; } catch { b.textContent = "Failed"; } setTimeout(() => b.textContent = "Copy", 1200); }; pre.appendChild(b); });
@@ -17,6 +21,26 @@ function add(who, text) { const d = document.createElement("div"); d.className =
   d.innerHTML = `<div class="av">${who === "u" ? "You" : '<img src="favicon.svg" alt="WrenbyAI" style="width:24px;height:24px;border-radius:5px">'}</div><div class="bub"></div>`;
   log.appendChild(d); const b = d.querySelector(".bub"); if (text != null) { if (who === "u") b.textContent = text; else md(b, text, true); } log.scrollTop = 1e9; return b; }
 const hello = () => add("a", "Hi, I'm WrenbyAI. Ask me anything, or tell me what we're building.");
+// ---------- side viewer ----------
+const viewer = $("#viewer"); let vfile = null;
+function openViewer(f) { vfile = f; $("#vicon").textContent = langOf(f.name); $("#vname").textContent = f.name.replace(/^\//, ""); $("#vsize").textContent = fmtSize(new Blob([f.content]).size);
+  const c = $("#vcode code"); c.textContent = f.content; hl(c, f.name); viewer.hidden = false; document.body.classList.add("viewer-open"); $("#vx").focus({ preventScroll: true }); }
+function closeViewer() { viewer.hidden = true; document.body.classList.remove("viewer-open"); vfile = null; }
+$("#vx").onclick = closeViewer; $("#vdl").onclick = () => vfile && downloadText(vfile.name, vfile.content);
+$("#vcopy").onclick = async e => { try { await navigator.clipboard.writeText(vfile.content); e.target.textContent = "Copied"; } catch { e.target.textContent = "Failed"; } setTimeout(() => e.target.textContent = "Copy", 1200); };
+// ---------- file cards ----------
+function card(f) { const d = document.createElement("div"); d.className = "fcard"; const lines = f.content.split("\n"); const long = lines.length > 12;
+  d.innerHTML = `<div class="fhead"><span class="ficon"></span><span class="fname"></span><span class="fsize"></span><span class="fgrow"></span>${long ? '<button class="fopen">Open</button>' : ""}<button class="primary fdl">Download</button></div><pre class="fpreview"><code></code></pre>`;
+  d.querySelector(".ficon").textContent = langOf(f.name); d.querySelector(".fname").textContent = f.name.replace(/^\//, ""); d.querySelector(".fname").title = "Open in viewer";
+  d.querySelector(".fsize").textContent = fmtSize(new Blob([f.content]).size) + " · " + lines.length + " line" + (lines.length === 1 ? "" : "s");
+  const code = d.querySelector("code"); code.textContent = lines.slice(0, 12).join("\n") + (long ? "\n…" : ""); hl(code, f.name);
+  d.querySelector(".fdl").onclick = () => downloadText(f.name, f.content); d.querySelector(".fname").onclick = d.querySelector(".fpreview").onclick = () => openViewer(f);
+  if (long) d.querySelector(".fopen").onclick = () => openViewer(f); return d; }
+function showFiles(bub, files) { const seen = new Map(); for (const f of files) seen.set(f.name, f); files = [...seen.values()]; if (!files.length) return;
+  const box = document.createElement("div"); box.className = "files"; files.forEach(f => box.appendChild(card(f)));
+  if (files.length > 1) { const z = document.createElement("button"); z.className = "zipall"; z.textContent = `Download all (${files.length} files, .zip)`; z.onclick = () => zipFiles(files.map(f => ({ name: f.name, content: f.content }))); box.appendChild(z); }
+  bub.appendChild(box); log.scrollTop = 1e9; }
+// ---------- thinking ----------
 const MASCOT = '<span class="wl">you</span><div class="mtrack" data-dir="left"><svg class="mob" viewBox="0 0 16 16" width="16" height="16" shape-rendering="crispEdges" aria-hidden="true"><g class="bob"><g class="mbody"><rect class="skin" x="3" y="2" width="10" height="9"></rect><rect class="eye" x="8" y="4" width="2" height="2"></rect><rect class="eye" x="11" y="4" width="1" height="2"></rect></g><rect class="leg l1" x="4" y="11" width="3" height="3"></rect><rect class="leg l2" x="9" y="11" width="3" height="3"></rect></g></svg></div><span class="wl">web</span>';
 function thinkBox(bub) { const t = document.createElement("details"); t.className = "think";
   t.innerHTML = '<summary><span class="tdot"></span><span class="tlabel">Thinking</span><span class="ttime"></span><span class="tchev">▾</span></summary><div class="steps"></div><div class="treason md" hidden></div>';
@@ -24,25 +48,34 @@ function thinkBox(bub) { const t = document.createElement("details"); t.classNam
   bub.appendChild(t); const t0 = Date.now(), tm = t.querySelector(".ttime"), iv = setInterval(() => tm.textContent = Math.round((Date.now() - t0) / 1000) + "s", 500);
   return { el: t, toWeb() { clearTimeout(dirT); mtrack.dataset.dir = "right"; dirT = setTimeout(() => { if (!ans) mtrack.dataset.dir = "left"; }, 1800); }, steps: t.querySelector(".steps"), reason: t.querySelector(".treason"),
     done() { ans = true; clearInterval(iv); t.classList.add("done"); t.open = false; t.querySelector(".tlabel").textContent = "Thought for " + Math.max(1, Math.round((Date.now() - t0) / 1000)) + "s"; tm.textContent = ""; } }; }
+const step = (th, txt) => { const s = document.createElement("div"); s.className = "step"; s.textContent = txt; th.steps.appendChild(s); };
 async function ask(text) {
   busy = true; send.textContent = "Stop"; status.textContent = "Thinking…"; add("u", text);
   const bub = add("a"); const th = thinkBox(bub); const out = document.createElement("div"); bub.appendChild(out);
   history.push({ role: "user", content: text }); ctrl = new AbortController();
   let content = "", reasoning = "", thinkDone = false; const endThink = () => { if (!thinkDone) { thinkDone = true; th.done(); } };
   try {
-    const res = await fetch(API, { method: "POST", signal: ctrl.signal, headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: [{ role: "system", content: SYS }, ...history.slice(-40)], max_tokens: MAXT[tier], tier }) });
-    if (!res.ok) { let m = res.status; try { m = (await res.json()).error || m; } catch {} throw new Error(res.status === 429 ? "You're sending messages too fast. Try again in a minute." : String(m)); }
-    const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "";
-    for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i;
-      while ((i = buf.indexOf("\n\n")) >= 0) { const ev = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!ev.startsWith("data:")) continue; const d = ev.slice(5).trim(); if (d === "[DONE]") continue;
-        let j; try { j = JSON.parse(d); } catch { continue; }
-        if (j.type === "search") { th.toWeb(); const s = document.createElement("div"); s.className = "step"; s.textContent = "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s"); th.steps.appendChild(s); continue; }
-        if (j.reasoning) { reasoning += j.reasoning; th.reason.hidden = false; md(th.reason, reasoning); }
-        if (j.content) { endThink(); status.textContent = "Writing…"; content += j.content; md(out, content); } } }
-    endThink(); md(out, content || "_(no reply)_", true); history.push({ role: "assistant", content });
+    const r = await runAgent([{ role: "system", content: SYS }, ...history.slice(-40)], { tier, maxTokens: MAXT[tier], signal: ctrl.signal,
+      on: { search: j => (th.toWeb(), 0) || step(th, "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s")),
+        reasoning: rs => { reasoning = rs; th.reason.hidden = false; md(th.reason, rs); },
+        content: c => { endThink(); status.textContent = "Writing…"; content = c; md(out, c); },
+        file: p => { step(th, "Created " + p.replace(/^\//, "")); status.textContent = "Writing files…"; } },
+      onFile: (name, c) => vfs.write(norm(name), c) });
+    endThink(); content = r.text; md(out, content || (r.files.length ? "" : "_(no reply)_"), true);
+    const fenced = fencedFiles(content).map(f => { if (!/^snippet-/.test(f.name)) vfs.write(norm(f.name), f.content); return { name: norm(f.name), content: f.content }; });
+    showFiles(bub, [...r.files, ...fenced]);
+    history.push({ role: "assistant", content: content + (r.files.length ? "\n\n[Created files: " + r.files.map(f => f.name).join(", ") + "]" : "") });
   } catch (e) { endThink(); if (e.name === "AbortError") { md(out, (content ? content + "\n\n" : "") + "_Stopped._", true); if (content) history.push({ role: "assistant", content }); }
     else { history.pop(); const w = document.createElement("div"); w.className = "warn"; w.textContent = "Couldn't reach WrenbyAI: " + e.message; out.appendChild(w); } }
   busy = false; ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); }
 $("#f").onsubmit = e => { e.preventDefault(); if (busy) { ctrl?.abort(); return; } const t = q.value.trim(); if (!t) return; q.value = ""; ask(t); };
-$("#reset").onclick = () => { ctrl?.abort(); history = []; log.innerHTML = ""; hello(); };
-hello(); q.focus();
+$("#reset").onclick = () => { ctrl?.abort(); history = []; log.innerHTML = ""; closeViewer(); hello(); };
+// ---------- terminal panel ----------
+const ufile = $("#ufile");
+ufile.onchange = async () => { for (const f of ufile.files) vfs.write("/" + f.name, await f.text()); ufile.value = ""; };
+initTerminal({ panel: $("#panel"), host: $("#xhost"), tree: $("#xtree"), upload: () => ufile.click(), openFile: p => openViewer({ name: p, content: vfs.read(p) }) });
+$("#tbtn").onclick = () => toggleTerminal(); $("#pclose").onclick = () => { toggleTerminal(false); q.focus(); }; $("#upl").onclick = () => ufile.click();
+$("#zipws").onclick = () => { const fs = [...vfs.files.keys()]; if (fs.length) zipFiles(fs.map(p => ({ name: p, content: vfs.read(p) })), "workspace.zip"); };
+addEventListener("keydown", e => { if (e.ctrlKey && (e.key === "`" || e.code === "Backquote")) { e.preventDefault(); if (!toggleTerminal()) q.focus(); }
+  else if (e.key === "Escape" && !viewer.hidden) { e.preventDefault(); closeViewer(); } });
+vfs.load(); hello(); q.focus();

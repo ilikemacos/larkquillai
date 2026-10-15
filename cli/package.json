@@ -1,0 +1,9 @@
+{
+  "name": "wrenbyai-cli",
+  "version": "0.1.0",
+  "description": "WrenbyAI in your terminal: a coding agent that reads and writes files and runs commands (with your OK).",
+  "type": "module",
+  "bin": { "wrenby": "wrenby.js" },
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "wrenbyai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WrenbyAI chat web app and CLI",
+  "type": "module",
+  "bin": { "wrenby": "cli/wrenby.js" },
+  "files": ["cli/"],
+  "engines": { "node": ">=18" }
+}

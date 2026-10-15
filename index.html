@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.ico" sizes="48x48"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#111111"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><script src="./md/highlight.min.js"></script><title>WrenbyAI</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.ico" sizes="48x48"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#111111"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><script src="./md/highlight.min.js"></script><script src="./md/fflate.min.js"></script><script src="./vendor/xterm.js"></script><script src="./vendor/addon-fit.js"></script><link rel="stylesheet" href="./vendor/xterm.css"><title>WrenbyAI</title>
 <style>
 :root{--bg:#111111;--fg:#ececec;--muted:#9a9a9a;--rule:#2a2a2a;--card:#181818;--accent:#ff6a2b;--warn:#e0a03a;--sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace}
 *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;font:15px/1.6 var(--sans);background:var(--bg);color:var(--fg);height:100vh;display:flex;-webkit-font-smoothing:antialiased}
@@ -81,11 +81,58 @@ pre{font-family:var(--mono);background:#0c0c0c;border:1px solid var(--rule);bord
 #tierhint{font-size:11px;color:var(--muted);margin-left:2px}
 #tier{background:transparent;color:var(--fg);border:1px solid #3a3a3a;border-radius:4px;height:32px;padding:0 8px;font:inherit;font-size:13px;font-weight:500;cursor:pointer}#tier:hover{border-color:#555}
 .dots::after{content:"…";animation:b 1s infinite}@keyframes b{50%{opacity:.2}}
+</style><style>
+body{height:100dvh;overflow:hidden}main{height:100dvh}
+.fcard{margin-top:12px;background:var(--card);border:1px solid var(--rule);border-radius:6px;max-width:560px;overflow:hidden}
+.fhead{display:flex;align-items:center;gap:10px;padding:10px 12px;min-width:0}
+.ficon{flex:none;min-width:34px;height:22px;padding:0 5px;border-radius:4px;background:#241510;color:var(--accent);font:600 10px/22px var(--mono);text-align:center}
+.fname{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.fname:hover{text-decoration:underline}
+.fsize{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}.fgrow{flex:1}
+.fhead button{height:28px;padding:0 10px;font-size:12px}.fhead .primary,.zipall{background:var(--accent);border:0;color:#111}.fhead .primary:hover,.zipall:hover{background:#ff7d45}
+.fpreview{margin:0;border:0;border-top:1px solid var(--rule);border-radius:0;max-height:180px;background:#0c0c0c;cursor:pointer}.fpreview code{font-size:12px;white-space:pre}
+.zipall{margin-top:10px;height:30px}
+#viewer{flex:0 0 44%;max-width:70vw;min-width:320px;display:flex;flex-direction:column;border-left:1px solid var(--rule);background:var(--bg);height:100dvh}
+.vhead{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--rule);min-height:56px}.vhead .fname{cursor:default}.vhead .fname:hover{text-decoration:none}
+.vx{height:30px;width:30px;padding:0;font-size:18px;line-height:1}
+#vcode{flex:1;margin:0;border:0;border-radius:0;max-height:none;background:#0c0c0c;padding:14px}#vcode code{font-size:12.5px;white-space:pre;line-height:1.55}
+#panel{flex:0 0 280px;display:flex;flex-direction:column;border-top:1px solid var(--rule);background:#0c0c0c;min-height:0}
+.ptabs{display:flex;align-items:center;gap:6px;padding:0 10px;height:34px;border-bottom:1px solid var(--rule);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ptabs b{color:var(--fg);font-weight:500;border-bottom:1px solid var(--accent);padding:8px 2px}.ptabs .g{flex:1}.ptabs button{height:24px;padding:0 8px;font-size:11px;text-transform:none;letter-spacing:0}
+.pbody{flex:1;display:flex;min-height:0}#xtree{flex:0 0 190px;overflow:auto;border-right:1px solid var(--rule);padding:6px 0;font-size:12.5px;background:#101010}
+.xrow{display:flex;align-items:center;height:24px;padding-right:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:#cfcfcf}.xrow:hover{background:#1a1a1a}.xdir{color:#9fb6ff}
+.xdl{margin-left:auto;height:20px;width:20px;padding:0;border:0;font-size:12px;color:var(--muted);opacity:0}.xrow:hover .xdl{opacity:1}.xempty{padding:8px 10px;color:#6a6a6a;font-size:12px}
+#xhost{flex:1;min-width:0;padding:6px 0 0 8px}
+header .hb{height:30px;font-size:12px}
+@media(max-width:760px){#viewer{position:fixed;top:0;left:0;right:0;height:55dvh;max-width:none;min-width:0;z-index:40;border-left:0;border-bottom:1px solid var(--rule);box-shadow:0 8px 30px #000a}#xtree{display:none}#panel{flex-basis:45dvh}#tierhint{display:none}}
 </style></head><body>
-<style>.bub.md{white-space:normal}.foot{width:100%}@media(max-width:640px){header{padding:10px 12px;flex-wrap:wrap}.badge{display:none}}</style>
-</head><body>
-<main><header><img class="logo" src="favicon.svg" alt="WrenbyAI"><h1>WrenbyAI</h1><span class="badge">chat</span><span id="status">Ready</span><select id="tier" title="Output length and memory"><option value="spark">Spark · 6k</option><option value="turbo">Turbo · 24k</option><option value="forge">Forge · 48k</option><option value="zenith">Zenith · 72k</option></select><span id="tierhint"></span><button id="reset">New chat</button></header>
+<style>.steps{margin:0 0 8px}.step{font-family:var(--mono);font-size:12px;color:var(--muted);border-left:1px solid var(--rule);padding:2px 0 2px 12px;margin:2px 0;max-width:560px}.step summary{cursor:pointer;list-style:none}.step summary::-webkit-details-marker{display:none}.step b{color:var(--fg);font-weight:500}.step.bad{border-left-color:#8a3a2a}.step pre{margin:6px 0 4px;max-height:200px}
+.bub.md{white-space:normal}.foot{width:100%}@media(max-width:640px){header{padding:10px 12px;flex-wrap:wrap}.badge{display:none}}</style>
+<style>
+body{height:100dvh;overflow:hidden}main{height:100dvh}
+.fcard{margin-top:12px;background:var(--card);border:1px solid var(--rule);border-radius:6px;max-width:560px;overflow:hidden}
+.fhead{display:flex;align-items:center;gap:10px;padding:10px 12px;min-width:0}
+.ficon{flex:none;min-width:34px;height:22px;padding:0 5px;border-radius:4px;background:#241510;color:var(--accent);font:600 10px/22px var(--mono);text-align:center}
+.fname{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}.fname:hover{text-decoration:underline}
+.fsize{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none}.fgrow{flex:1}
+.fhead button{height:28px;padding:0 10px;font-size:12px}.fhead .primary,.zipall{background:var(--accent);border:0;color:#111}.fhead .primary:hover,.zipall:hover{background:#ff7d45}
+.fpreview{margin:0;border:0;border-top:1px solid var(--rule);border-radius:0;max-height:180px;background:#0c0c0c;cursor:pointer}.fpreview code{font-size:12px;white-space:pre}
+.zipall{margin-top:10px;height:30px}
+#viewer{flex:0 0 44%;max-width:70vw;min-width:320px;display:flex;flex-direction:column;border-left:1px solid var(--rule);background:var(--bg);height:100dvh}
+.vhead{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--rule);min-height:56px}.vhead .fname{cursor:default}.vhead .fname:hover{text-decoration:none}
+.vx{height:30px;width:30px;padding:0;font-size:18px;line-height:1}
+#vcode{flex:1;margin:0;border:0;border-radius:0;max-height:none;background:#0c0c0c;padding:14px}#vcode code{font-size:12.5px;white-space:pre;line-height:1.55}
+#panel{flex:0 0 280px;display:flex;flex-direction:column;border-top:1px solid var(--rule);background:#0c0c0c;min-height:0}
+.ptabs{display:flex;align-items:center;gap:6px;padding:0 10px;height:34px;border-bottom:1px solid var(--rule);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ptabs b{color:var(--fg);font-weight:500;border-bottom:1px solid var(--accent);padding:8px 2px}.ptabs .g{flex:1}.ptabs button{height:24px;padding:0 8px;font-size:11px;text-transform:none;letter-spacing:0}
+.pbody{flex:1;display:flex;min-height:0}#xtree{flex:0 0 190px;overflow:auto;border-right:1px solid var(--rule);padding:6px 0;font-size:12.5px;background:#101010}
+.xrow{display:flex;align-items:center;height:24px;padding-right:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:#cfcfcf}.xrow:hover{background:#1a1a1a}.xdir{color:#9fb6ff}
+.xdl{margin-left:auto;height:20px;width:20px;padding:0;border:0;font-size:12px;color:var(--muted);opacity:0}.xrow:hover .xdl{opacity:1}.xempty{padding:8px 10px;color:#6a6a6a;font-size:12px}
+#xhost{flex:1;min-width:0;padding:6px 0 0 8px}
+header .hb{height:30px;font-size:12px}
+@media(max-width:760px){#viewer{position:fixed;top:0;left:0;right:0;height:55dvh;max-width:none;min-width:0;z-index:40;border-left:0;border-bottom:1px solid var(--rule);box-shadow:0 8px 30px #000a}#xtree{display:none}#panel{flex-basis:45dvh}#tierhint{display:none}}
+</style></head><body>
+<main><header><img class="logo" src="favicon.svg" alt="WrenbyAI"><h1>WrenbyAI</h1><span class="badge">chat</span><span id="status">Ready</span><select id="tier" title="Output length and memory"><option value="spark">Spark · 6k</option><option value="turbo">Turbo · 24k</option><option value="forge">Forge · 48k</option><option value="zenith">Zenith · 72k</option></select><span id="tierhint"></span><button id="tbtn" class="hb" title="Toggle terminal (Ctrl+`)">Terminal</button><button id="reset">New chat</button></header>
 <div id="log"></div>
-<form id="f"><input id="q" placeholder="Message WrenbyAI" autocomplete="off"><button id="send">Send</button></form>
-<div class="foot">WrenbyAI can make mistakes. Check important info.</div></main>
+<section id="panel" hidden><div class="ptabs"><b>Terminal</b><span class="g"></span><button id="upl" title="Add files from your computer">Upload</button><button id="zipws" title="Download the workspace as a zip">Zip all</button><button id="pclose" title="Close (Ctrl+`)">✕</button></div><div class="pbody"><div id="xtree"></div><div id="xhost"></div></div></section><form id="f"><input id="q" placeholder="Message WrenbyAI" autocomplete="off"><button id="send">Send</button></form>
+<div class="foot">WrenbyAI can make mistakes. Check important info.</div></main><aside id="viewer" hidden><div class="vhead"><span class="ficon" id="vicon"></span><span class="fname" id="vname"></span><span class="fsize" id="vsize"></span><span class="fgrow"></span><button id="vcopy">Copy</button><button id="vdl" class="primary" style="background:var(--accent);border:0;color:#111">Download</button><button class="vx" id="vx" title="Close (Esc)">×</button></div><pre id="vcode"><code></code></pre></aside><input type="file" id="ufile" multiple hidden>
 <script type="module" src="./chat.js"></script></body></html>
