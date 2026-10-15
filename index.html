@@ -104,6 +104,7 @@ body{height:100dvh;overflow:hidden}main{height:100dvh}
 #xhost{flex:1;min-width:0;padding:6px 0 0 8px}
 header .hb{height:30px;font-size:12px}
 @media(max-width:760px){#viewer{position:fixed;top:0;left:0;right:0;height:55dvh;max-width:none;min-width:0;z-index:40;border-left:0;border-bottom:1px solid var(--rule);box-shadow:0 8px 30px #000a}#xtree{display:none}#panel{flex-basis:45dvh}#tierhint{display:none}}
+.foot{width:100%;text-align:center}body.term-open .foot{display:none}.xrow{justify-content:space-between}
 </style></head><body>
 <style>.steps{margin:0 0 8px}.step{font-family:var(--mono);font-size:12px;color:var(--muted);border-left:1px solid var(--rule);padding:2px 0 2px 12px;margin:2px 0;max-width:560px}.step summary{cursor:pointer;list-style:none}.step summary::-webkit-details-marker{display:none}.step b{color:var(--fg);font-weight:500}.step.bad{border-left-color:#8a3a2a}.step pre{margin:6px 0 4px;max-height:200px}
 .bub.md{white-space:normal}.foot{width:100%}@media(max-width:640px){header{padding:10px 12px;flex-wrap:wrap}.badge{display:none}}</style>
@@ -130,6 +131,7 @@ body{height:100dvh;overflow:hidden}main{height:100dvh}
 #xhost{flex:1;min-width:0;padding:6px 0 0 8px}
 header .hb{height:30px;font-size:12px}
 @media(max-width:760px){#viewer{position:fixed;top:0;left:0;right:0;height:55dvh;max-width:none;min-width:0;z-index:40;border-left:0;border-bottom:1px solid var(--rule);box-shadow:0 8px 30px #000a}#xtree{display:none}#panel{flex-basis:45dvh}#tierhint{display:none}}
+.foot{width:100%;text-align:center}body.term-open .foot{display:none}.xrow{justify-content:space-between}
 </style></head><body>
 <main><header><img class="logo" src="favicon.svg" alt="WrenbyAI"><h1>WrenbyAI</h1><span class="badge">chat</span><span id="status">Ready</span><select id="tier" title="Output length and memory"><option value="spark">Spark · 6k</option><option value="turbo">Turbo · 24k</option><option value="forge">Forge · 48k</option><option value="zenith">Zenith · 72k</option></select><span id="tierhint"></span><button id="tbtn" class="hb" title="Toggle terminal (Ctrl+`)">Terminal</button><button id="reset">New chat</button></header>
 <div id="log"></div>
