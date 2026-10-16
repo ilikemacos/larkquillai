@@ -40,7 +40,7 @@ async function runTool(name, a) { try { switch (name) {
   default: return { ok: false, error: "unknown tool" }; } } catch (e) { return { ok: false, error: e.message }; } }
 async function stream(messages, step) {
   const res = await fetch(API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages, tools: TOOLS, max_tokens: MAXT, tier: TIER, no_search: step > 0 }) });
-  if (!res.ok) { let m = res.status; try { m = (await res.json()).error || m; } catch {} throw new Error(res.status === 429 ? "rate limited, try again in a minute" : String(m)); }
+  if (!res.ok) { let m = res.status, code; try { const j = await res.json(); m = j.error || m; code = j.code; } catch {} throw new Error(code === "token_limit" ? String(m) : res.status === 429 ? "rate limited, try again in a minute" : String(m)); }
   const dec = new TextDecoder(); let buf = "", content = "", thinking = false, started = false; const tc = [];
   const spin = tty ? setInterval(() => { if (!started) { process.stdout.write("\r" + dim((thinking ? "thinking" : "working") + ".".repeat((Date.now() / 400 | 0) % 4) + "   ")); } }, 200) : null;
   try { for await (const chunk of res.body) { buf += dec.decode(chunk, { stream: true }); let i;
