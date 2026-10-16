@@ -43,22 +43,26 @@ export async function streamOnce(body, on = {}, signal) {
   const tok = typeof localStorage !== "undefined" && localStorage.getItem("wy.token");
   const res = await fetch(API, { method: "POST", signal, headers: { "content-type": "application/json", ...(tok ? { authorization: "Bearer " + tok } : {}) }, body: JSON.stringify(body) });
   if (!res.ok) { let m = res.status, code; try { const j = await res.json(); m = j.error || m; code = j.code; } catch {} throw new Error(code === "token_limit" ? String(m) : res.status === 429 ? "Too many messages. Try again in a minute." : String(m)); }
-  const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "", content = "", reasoning = ""; const tc = [];
+  const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "", content = "", reasoning = "", err = null; const tc = [];
   for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i;
     while ((i = buf.indexOf("\n\n")) >= 0) { const ev = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!ev.startsWith("data:")) continue; const d = ev.slice(5).trim(); if (d === "[DONE]") continue;
       let j; try { j = JSON.parse(d); } catch { continue; }
       if (j.type === "search") { on.search?.(j); continue; }
+      if (j.error) { err = j; continue; }
       if (j.reasoning) { reasoning += j.reasoning; on.reasoning?.(reasoning, j.reasoning); }
       if (j.content) { content += j.content; on.content?.(content, j.content); }
       for (const t of j.tool_calls || []) { const k = t.index ?? tc.length; tc[k] ||= { id: "", type: "function", function: { name: "", arguments: "" } };
         if (t.id) tc[k].id = t.id; if (t.function?.name) tc[k].function.name += t.function.name; if (t.function?.arguments) tc[k].function.arguments += t.function.arguments; } } }
   tc.forEach((c, i) => { if (c && !c.id) c.id = "call_" + i; });
+  // never return silently empty: surface the server's no-answer event, or a stream that just ended empty
+  if (!content.trim() && !tc.some(c => c?.function?.name)) { const e = new Error(err?.error || "WrenbyAI didn't send an answer this time. Please try again."); e.code = "no_answer"; e.reason = err?.reason || "empty"; throw e; }
   return { content, reasoning, tool_calls: tc.filter(c => c?.function?.name) }; }
 // Agent loop: runs create_file calls via onFile(name, content) -> path. Returns final text + files.
 export async function runAgent(messages, { tier = "spark", maxTokens = 6144, on = {}, onFile, signal, noSearch } = {}) {
   const msgs = [...messages], files = []; let text = "";
   for (let step = 0; step < 6; step++) {
-    const r = await streamOnce({ messages: msgs, tools: [CREATE_FILE], max_tokens: maxTokens, tier, no_search: noSearch || step > 0 }, { ...on, content: (c, d) => on.content?.(text + c, d) }, signal);
+    const req = () => streamOnce({ messages: msgs, tools: [CREATE_FILE], max_tokens: maxTokens, tier, no_search: noSearch || step > 0 }, { ...on, content: (c, d) => on.content?.(text + c, d) }, signal);
+    let r; try { r = await req(); } catch (e) { if (e.code !== "no_answer" || e.reason === "length" || e.reason === "timeout") throw e; on.retry?.(); r = await req(); } // one retry when the service went quiet
     text += r.content;
     if (!r.tool_calls.length) break;
     msgs.push({ role: "assistant", content: r.content || null, tool_calls: r.tool_calls });

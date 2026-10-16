@@ -13,7 +13,7 @@ Files: when the user asks you to make a file, script, page or project, call the 
 let history = [], busy = false, ctrl = null, tier = localStorage.getItem("wrenby-tier") || "spark";
 const tsel = $("#tier"); tsel.value = tier; const hint = () => $("#tierhint").textContent = tier === "zenith" ? "uses the most usage" : "";
 tsel.onchange = () => { tier = tsel.value; localStorage.setItem("wrenby-tier", tier); hint(); }; hint();
-const MAXT = { spark: 6144, turbo: 24576, forge: 49152, zenith: 73728 };
+const MAXT = { spark: 6144, turbo: 24576, forge: 32768, zenith: 32768 };
 const hl = (code, name) => { if (!window.hljs) return; const e = (name.split(".").pop() || "").toLowerCase(); const l = { js: "javascript", mjs: "javascript", py: "python", ts: "typescript", sh: "bash", htm: "html", html: "xml", md: "markdown", yml: "yaml", rs: "rust" }[e] || e;
   try { code.innerHTML = hljs.getLanguage(l) ? hljs.highlight(code.textContent, { language: l }).value : hljs.highlightAuto(code.textContent).value; } catch {} };
 function enhance(el) { el.querySelectorAll("pre").forEach(pre => { const code = pre.querySelector("code"); if (code && window.hljs) try { hljs.highlightElement(code); } catch {}
@@ -71,6 +71,7 @@ async function ask(text) {
       on: { search: j => (th.toWeb(), 0) || step(th, "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s")),
         reasoning: rs => { reasoning = rs; th.reason.hidden = false; md(th.reason, rs); },
         content: c => { endThink(); status.textContent = "Writing…"; content = c; md(out, c); },
+        retry: () => step(th, "No answer came back · retrying once"),
         file: p => { step(th, "Created " + p.replace(/^\//, "")); status.textContent = "Writing files…"; } },
       onFile: (name, c) => vfs.write(norm(name), c) });
     endThink(); content = r.text; md(out, content || (r.files.length ? "" : "_(no reply)_"), true);
@@ -80,7 +81,7 @@ async function ask(text) {
     if (session) session.saveTurn({ user: text, assistant: content, files: allFiles.length ? allFiles : null, mode: tier }).catch(() => {});
     history.push({ role: "assistant", content: content + (r.files.length ? "\n\n[Created files: " + r.files.map(f => f.name).join(", ") + "]" : "") });
   } catch (e) { endThink(); if (e.name === "AbortError") { md(out, (content ? content + "\n\n" : "") + "_Stopped._", true); if (content) history.push({ role: "assistant", content }); }
-    else { history.pop(); const w = document.createElement("div"); w.className = "warn"; w.textContent = "Couldn't reach WrenbyAI: " + e.message; out.appendChild(w); } }
+    else { history.pop(); const w = document.createElement("div"); w.className = "warn"; w.textContent = e.code === "no_answer" ? e.message : "Couldn't reach WrenbyAI: " + e.message; out.appendChild(w); } }
   busy = false; dispatchEvent(new Event("wrenby:gen-end")); ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); }
 $("#f").onsubmit = e => { e.preventDefault(); if (busy) { ctrl?.abort(); return; } const t = q.value.trim(); if (!t) return; q.value = ""; ask(t); };
 const freshChat = () => { ctrl?.abort(); history = []; log.innerHTML = ""; closeViewer(); };
