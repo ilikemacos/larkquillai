@@ -3,7 +3,7 @@
 // Stores a bearer token in localStorage (for GitHub Pages and Tauri where the
 // session cookie is cross-site) and also sends credentials for same-origin cookies.
 const LS = "wy.token";
-const S = { base: "", token: null, user: null, configured: false, chats: [], chatId: null, guest: [], opts: {}, els: {} };
+const S = { base: "", token: null, user: null, configured: false, chats: [], chatId: null, guest: [], opts: {}, els: {}, feat: {} };
 
 function api(path, { method = "GET", body } = {}) {
   const headers = {};
@@ -16,6 +16,8 @@ export async function initAuth(opts) {
   S.opts = opts || {}; S.base = opts.base || ""; S.token = localStorage.getItem(LS) || null;
   let me; try { me = await (await api("/api/auth/me")).json(); } catch { me = { configured: false }; }
   S.configured = !!me.configured;
+  S.feat = { recaptchaSiteKey: me.recaptchaSiteKey || null, googleClientId: me.googleClientId || null };
+  if (S.configured && S.feat.recaptchaSiteKey) loadScript("https://www.google.com/recaptcha/api.js?render=" + encodeURIComponent(S.feat.recaptchaSiteKey)).catch(() => {});
   if (!S.configured) return session();        // backend not ready: no auth UI at all
   injectStyle(); buildChrome();
   S.user = me.user || null; render();
@@ -135,14 +137,56 @@ async function deleteChat(c) {
     await refreshChats(); } catch {}
 }
 
+// ---- reCAPTCHA v3 + Google Identity Services (both optional, server-flagged) ----
+const scripts = {};
+function loadScript(src) {
+  return scripts[src] || (scripts[src] = new Promise((res, rej) => {
+    const sc = document.createElement("script"); sc.src = src; sc.async = true; sc.defer = true;
+    sc.onload = res; sc.onerror = () => { delete scripts[src]; rej(new Error("load failed")); }; document.head.appendChild(sc);
+  }));
+}
+async function captcha(action) {
+  const key = S.feat.recaptchaSiteKey; if (!key) return undefined;
+  try {
+    await loadScript("https://www.google.com/recaptcha/api.js?render=" + encodeURIComponent(key));
+    await new Promise(r => window.grecaptcha.ready(r));
+    return await window.grecaptcha.execute(key, { action });
+  } catch { return undefined; }            // server decides; it rejects if captcha is required
+}
+async function finishSignin(j, dlg) {
+  S.token = j.token || null; if (S.token) localStorage.setItem(LS, S.token);
+  S.user = j.user; dlg.close(); render(); await refreshChats();
+  await offerImport();
+}
+async function mountGoogle(dlg, err) {
+  const cid = S.feat.googleClientId; if (!cid) return;
+  const wrap = dlg.querySelector(".wy-google"); wrap.hidden = false;
+  try { await loadScript("https://accounts.google.com/gsi/client"); } catch { wrap.hidden = true; return; }
+  window.google.accounts.id.initialize({
+    client_id: cid, ux_mode: "popup", auto_select: false,
+    callback: async ({ credential }) => {
+      err.textContent = "";
+      try {
+        const r = await api("/api/auth/google", { method: "POST", body: { credential, recaptcha: await captcha("google_signin") } });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { err.textContent = j.error || "Google sign-in failed."; return; }
+        await finishSignin(j, dlg);
+      } catch { err.textContent = "Something went wrong. Try again."; }
+    },
+  });
+  window.google.accounts.id.renderButton(wrap.querySelector(".wy-gbtn"), { theme: "filled_black", size: "large", text: "continue_with", shape: "rectangular", width: 300 });
+}
+
 // ---- sign-in dialog ----
 function openSignin() {
   const dlg = document.createElement("dialog"); dlg.className = "wy-dialog";
   dlg.innerHTML = `<div class="wy-dh">Sign in to WrenbyAI</div><div class="wy-db">
+    <div class="wy-google" hidden><div class="wy-gbtn"></div><div class="wy-or">or</div></div>
     <div class="wy-hint">We'll email you a 6-digit code. No password needed.</div>
     <input class="wy-email-in" type="email" placeholder="you@example.com" autocomplete="email">
     <input class="wy-code-in" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code" hidden>
     <div class="wy-err"></div>
+    <div class="wy-legal" hidden>Protected by reCAPTCHA. Google <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a> &amp; <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a> apply.</div>
     <div class="wy-df"><button class="wy-cancel">Cancel</button><button class="primary wy-go">Send code</button></div></div>`;
   document.body.appendChild(dlg); dlg.showModal();
   const emailIn = dlg.querySelector(".wy-email-in"), codeIn = dlg.querySelector(".wy-code-in");
@@ -151,23 +195,23 @@ function openSignin() {
   dlg.addEventListener("close", () => dlg.remove());
   let stage = "email", email = "";
   emailIn.focus();
+  mountGoogle(dlg, err);
+  if (S.feat.recaptchaSiteKey) dlg.querySelector(".wy-legal").hidden = false;
   go.onclick = async () => {
     err.textContent = ""; go.disabled = true;
     try {
       if (stage === "email") {
         email = emailIn.value.trim().toLowerCase();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "Enter a valid email."; go.disabled = false; return; }
-        const r = await api("/api/auth/start", { method: "POST", body: { email } });
+        const r = await api("/api/auth/start", { method: "POST", body: { email, recaptcha: await captcha("request_code") } });
         if (!r.ok) { err.textContent = (await r.json().catch(() => ({}))).error || "Could not send code."; go.disabled = false; return; }
         stage = "code"; emailIn.disabled = true; codeIn.hidden = false; codeIn.focus(); go.textContent = "Verify";
       } else {
         const code = codeIn.value.trim();
-        const r = await api("/api/auth/verify", { method: "POST", body: { email, code } });
+        const r = await api("/api/auth/verify", { method: "POST", body: { email, code, recaptcha: await captcha("verify_code") } });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) { err.textContent = j.error || "Incorrect code."; go.disabled = false; return; }
-        S.token = j.token || null; if (S.token) localStorage.setItem(LS, S.token);
-        S.user = j.user; dlg.close(); render(); await refreshChats();
-        await offerImport();
+        await finishSignin(j, dlg); return;
       }
     } catch (e) { err.textContent = "Something went wrong. Try again."; }
     go.disabled = false;
@@ -219,6 +263,9 @@ function injectStyle() {
 .wy-dialog input{width:100%;background:var(--bg);border:1px solid var(--rule);color:var(--fg);border-radius:4px;height:40px;padding:0 12px;font:inherit;outline:none;margin-bottom:10px}
 .wy-dialog input:focus{border-color:#555}.wy-dialog input:disabled{opacity:.6}
 .wy-err{color:#e06a5a;font-size:12px;min-height:16px;margin-bottom:8px}
+.wy-google{margin-bottom:12px}.wy-gbtn{display:flex;justify-content:center;min-height:40px}
+.wy-or{text-align:center;font-size:12px;color:var(--muted);margin-top:10px}
+.grecaptcha-badge{visibility:hidden}.wy-legal{font-size:10px;color:var(--muted);margin-bottom:10px}.wy-legal a{color:var(--muted)}
 .wy-df{display:flex;gap:8px;justify-content:flex-end}
 .wy-dialog .primary{background:var(--accent);border:0;color:#111;font-weight:600}.wy-dialog .primary:hover{background:#ff7d45}
 @media(max-width:860px){.wy-hamb{display:inline-flex}#histbar{position:fixed;top:0;left:0;bottom:0;width:260px;z-index:70;flex-basis:260px;transform:translateX(-100%);transition:transform .2s;box-shadow:8px 0 30px rgba(0,0,0,.5)}#histbar.open{transform:none}}
