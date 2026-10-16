@@ -54,7 +54,7 @@ function thinkBox(bub) { const t = document.createElement("details"); t.classNam
     done() { ans = true; clearInterval(iv); t.classList.add("done"); t.open = false; t.querySelector(".tlabel").textContent = "Thought for " + Math.max(1, Math.round((Date.now() - t0) / 1000)) + "s"; tm.textContent = ""; } }; }
 const step = (th, txt) => { const s = document.createElement("div"); s.className = "step"; s.textContent = txt; th.steps.appendChild(s); };
 async function ask(text) {
-  busy = true; send.textContent = "Stop"; status.textContent = "Thinking…"; add("u", text);
+  busy = true; dispatchEvent(new Event("wrenby:gen-start")); send.textContent = "Stop"; status.textContent = "Thinking…"; add("u", text);
   const bub = add("a"); const th = thinkBox(bub); const out = document.createElement("div"); bub.appendChild(out);
   history.push({ role: "user", content: text }); ctrl = new AbortController();
   let content = "", reasoning = "", thinkDone = false; const endThink = () => { if (!thinkDone) { thinkDone = true; th.done(); } };
@@ -64,7 +64,7 @@ async function ask(text) {
         if (ct) { endThink(); md(out, ct.summary || (ct.status === "done" ? "Done." : "_" + ct.status + "_"), true); ct.files.forEach(f => vfs.write(norm(f.name), f.content)); showFiles(bub, ct.files);
           const reply = (ct.summary || "") + (ct.files.length ? "\n\n[Created files in cloud sandbox: " + ct.files.map(f => f.name).join(", ") + "]" : "");
           if (session) session.saveTurn({ user: text, assistant: reply, files: ct.files.length ? ct.files : null, mode: tier }).catch(() => {});
-          history.push({ role: "assistant", content: reply }); busy = false; ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); return; } }
+          history.push({ role: "assistant", content: reply }); busy = false; dispatchEvent(new Event("wrenby:gen-end")); ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); return; } }
       else classifyRemote(text, tier).then(c => { if (c.hard) { const h = document.createElement("div"); h.className = "warn"; h.textContent = "Sign in to run this in a cloud sandbox (real install, build and test)."; bub.appendChild(h); } }).catch(() => {});
     }
     const r = await runAgent([{ role: "system", content: SYS }, ...history.slice(-40)], { tier, maxTokens: MAXT[tier], signal: ctrl.signal,
@@ -81,7 +81,7 @@ async function ask(text) {
     history.push({ role: "assistant", content: content + (r.files.length ? "\n\n[Created files: " + r.files.map(f => f.name).join(", ") + "]" : "") });
   } catch (e) { endThink(); if (e.name === "AbortError") { md(out, (content ? content + "\n\n" : "") + "_Stopped._", true); if (content) history.push({ role: "assistant", content }); }
     else { history.pop(); const w = document.createElement("div"); w.className = "warn"; w.textContent = "Couldn't reach WrenbyAI: " + e.message; out.appendChild(w); } }
-  busy = false; ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); }
+  busy = false; dispatchEvent(new Event("wrenby:gen-end")); ctrl = null; send.textContent = "Send"; status.textContent = "Ready"; q.focus(); }
 $("#f").onsubmit = e => { e.preventDefault(); if (busy) { ctrl?.abort(); return; } const t = q.value.trim(); if (!t) return; q.value = ""; ask(t); };
 const freshChat = () => { ctrl?.abort(); history = []; log.innerHTML = ""; closeViewer(); };
 $("#reset").onclick = () => { freshChat(); hello(); session?.startNewChat(); };
