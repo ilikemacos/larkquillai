@@ -40,8 +40,9 @@ export function zipFiles(list, name = "wrenbyai-files.zip") { const enc = new Te
 // ---------- API ----------
 export const CREATE_FILE = { type: "function", function: { name: "create_file", description: "Create or overwrite a file for the user to download. Always pass the COMPLETE file content.", parameters: { type: "object", properties: { filename: { type: "string", description: "relative path, e.g. app.js or src/main.py" }, content: { type: "string" } }, required: ["filename", "content"] } } };
 export async function streamOnce(body, on = {}, signal) {
-  const res = await fetch(API, { method: "POST", signal, headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-  if (!res.ok) { let m = res.status; try { m = (await res.json()).error || m; } catch {} throw new Error(res.status === 429 ? "Too many messages. Try again in a minute." : String(m)); }
+  const tok = typeof localStorage !== "undefined" && localStorage.getItem("wy.token");
+  const res = await fetch(API, { method: "POST", signal, headers: { "content-type": "application/json", ...(tok ? { authorization: "Bearer " + tok } : {}) }, body: JSON.stringify(body) });
+  if (!res.ok) { let m = res.status, code; try { const j = await res.json(); m = j.error || m; code = j.code; } catch {} throw new Error(code === "token_limit" ? String(m) : res.status === 429 ? "Too many messages. Try again in a minute." : String(m)); }
   const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "", content = "", reasoning = ""; const tc = [];
   for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i;
     while ((i = buf.indexOf("\n\n")) >= 0) { const ev = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!ev.startsWith("data:")) continue; const d = ev.slice(5).trim(); if (d === "[DONE]") continue;
