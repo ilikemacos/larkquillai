@@ -93,3 +93,15 @@ html.wy-sky .wy-dialog .primary,html.wy-sky .wy-dialog .wy-go{background:#1b1a24
 html.wy-sky-night .msg.a .bub{background:rgba(255,255,255,.84)!important}
 html.wy-sky-night form#f{background:rgba(255,255,255,.82)!important}
 html.wy-sky-night .msg.u .bub{background:rgba(10,10,20,.72)!important;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset,0 6px 18px rgba(0,0,0,.3)!important}
+html.wy-sky .wy-settings .pri,html.wy-sky .wy-sl .pri{background:#1b1a24!important;color:#fff!important;border:0!important;box-shadow:0 4px 12px rgba(20,20,40,.18)!important;font-weight:500}
+/* Pages' lightweight settings sheet */
+html.wy-sky .wy-sl{background:rgba(250,250,253,.92)!important;color:#1b1a24!important;border:1px solid rgba(255,255,255,.9)!important;border-radius:26px!important;box-shadow:0 30px 80px rgba(20,20,50,.25)!important;filter:none!important;
+  -webkit-backdrop-filter:blur(30px) saturate(170%);backdrop-filter:blur(30px) saturate(170%)}
+html.wy-sky .wy-sl::backdrop{background:rgba(20,22,40,.18)!important}
+html.wy-sky .wy-sl .row{border-bottom:1px solid rgba(30,30,60,.08)!important}
+html.wy-sky .wy-sl .t{color:#1b1a24!important;font-weight:500}html.wy-sky .wy-sl .sub,html.wy-sky .wy-sl .d{color:rgba(27,26,36,.55)!important}
+html.wy-sky .wy-sl .seg{border:0!important;background:rgba(30,30,60,.06)!important;padding:2px}
+html.wy-sky .wy-sl .seg button{background:transparent!important;color:rgba(27,26,36,.6)!important;border-radius:999px!important;box-shadow:none!important}
+html.wy-sky .wy-sl .seg button.on{background:#fff!important;color:#1b1a24!important;box-shadow:0 1px 3px rgba(30,30,60,.12)!important}
+html.wy-sky .wy-sl button.pri{all:unset;cursor:pointer;background:#1b1a24!important;color:#fff!important;border-radius:999px;height:32px;padding:0 16px;font-size:12.5px;font-weight:500;box-shadow:0 4px 12px rgba(20,20,40,.18)}
+html.wy-sky .wy-sl .x{background:rgba(30,30,60,.06)!important;color:#1b1a24!important;border:0!important;box-shadow:none!important}
