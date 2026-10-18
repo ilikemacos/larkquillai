@@ -25,7 +25,7 @@ wrenby
 - `wrenby` starts an interactive session in the current folder.
 - `wrenby "add a README to this project"` runs one task and exits.
 - WrenbyAI can list and read files in this folder. It asks before writing a file or running a command. `-y` approves everything automatically.
-- `--tier=spark|turbo|forge|zenith` sets the reply length.
+- `--tier=chirp|trill|aria|chorus` sets the reply length.
 - In a session, `/clear` forgets the conversation and `/exit` quits.
 
 This package isn't published to npm.
