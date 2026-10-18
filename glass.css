@@ -161,9 +161,6 @@ body>main>h2,main>section>h2{letter-spacing:-.01em}
 .wy-dialog .wy-methods{display:flex;gap:2px;padding:3px;margin-bottom:14px;border-radius:999px;background:rgba(0,0,0,.25);border:1px solid var(--g-line)}
 .wy-dialog .wy-methods button{flex:1;height:30px!important;border:0!important;background:transparent!important;box-shadow:none!important;font-size:12px;color:var(--muted)!important}
 .wy-dialog .wy-methods button.on{background:rgba(255,255,255,.15)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 8px rgba(0,0,0,.25)!important}
-.wy-dialog .wy-code-in{height:64px!important;font-size:28px!important;letter-spacing:.45em!important;text-align:center;border-radius:18px!important;
-  background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.03))!important;border:1px solid rgba(255,255,255,.22)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -8px 20px rgba(0,0,0,.18),0 8px 24px rgba(0,0,0,.3)!important;color:#fff!important;caret-color:var(--g-accent)}
-.wy-dialog .wy-code-in::placeholder{letter-spacing:normal!important;font-size:15px!important;color:rgba(235,235,245,.4)}
 .wy-dialog .wy-hint,.wy-dialog .wy-spam{color:var(--muted)!important}
 .wy-dialog .wy-df{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
 .wy-dialog .wy-df button{height:38px!important;padding:0 18px!important}
@@ -171,3 +168,37 @@ body>main>h2,main>section>h2{letter-spacing:-.01em}
 .wy-dialog input{box-sizing:border-box!important;width:100%!important;max-width:100%!important}
 .wy-dialog .wy-spam{margin:8px 0 6px!important}
 .wy-dialog .wy-methods button:focus-visible{outline:2px solid rgba(255,154,92,.55)!important;outline-offset:-2px!important}
+
+/* ---------- email code step: six glass slots ---------- */
+.wy-dialog.wy-codestage .wy-methods,.wy-dialog.wy-codestage .wy-google,.wy-dialog.wy-codestage .wy-hint,
+.wy-dialog.wy-codestage .wy-email-in,.wy-dialog.wy-codestage .wy-cancel{display:none!important}
+.wy-codehead{text-align:center;margin:2px 0 18px}
+.wy-codehead::before{content:"";display:block;width:52px;height:52px;margin:0 auto 14px;border-radius:16px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='3'/%3E%3Cpath d='m4 7 8 6 8-6'/%3E%3C/svg%3E") center/24px no-repeat,
+  linear-gradient(160deg,rgba(255,154,92,.55),rgba(124,92,255,.45));border:1px solid rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 26px rgba(255,106,43,.25)}
+.wy-codehead .wy-ct{font-size:19px;font-weight:650;letter-spacing:-.015em;color:#fff}
+.wy-codehead .wy-cs{margin-top:6px;font-size:13.5px;line-height:1.45;color:var(--muted)}
+.wy-codehead .wy-cs b{color:#fff;font-weight:600;word-break:break-all}
+.wy-otp{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:0 0 12px;cursor:text}
+.wy-otp[hidden]{display:none!important}
+.wy-otp .wy-code-in,.wy-otp .wy-code-in[hidden]{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;opacity:0!important;
+  border:0!important;padding:0!important;margin:0!important;background:none!important;box-shadow:none!important;color:transparent!important;caret-color:transparent!important;font-size:16px!important;z-index:2}
+.wy-slot{height:56px;border-radius:14px;display:grid;place-items:center;font:600 24px/1 "Inter",-apple-system,BlinkMacSystemFont,sans-serif;color:#fff;font-variant-numeric:tabular-nums;
+  background:linear-gradient(170deg,rgba(255,255,255,.10),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 4px 14px rgba(0,0,0,.22);
+  transition:border-color .15s,box-shadow .15s,background .15s}
+.wy-slot.filled{background:linear-gradient(170deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border-color:rgba(255,255,255,.28)}
+.wy-slot.cur{border-color:rgba(255,154,92,.9);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0 0 4px rgba(255,106,43,.18),0 4px 14px rgba(0,0,0,.22)}
+.wy-slot.cur:empty::after{content:"";width:2px;height:24px;border-radius:2px;background:#ff9a5c;animation:wy-blink 1s steps(1) infinite}
+@keyframes wy-blink{50%{opacity:0}}
+.wy-otp.shake{animation:wy-shake .38s}
+@keyframes wy-shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.wy-codefoot{display:flex;justify-content:space-between;margin:2px 2px 6px}
+.wy-codefoot[hidden]{display:none!important}
+.wy-dialog .wy-link{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;height:auto!important;font-size:12.5px!important;color:#ffc4a3!important;cursor:pointer}
+.wy-dialog .wy-link:hover{text-decoration:underline}.wy-dialog .wy-link:disabled{color:var(--muted)!important;cursor:default;text-decoration:none}
+.wy-dialog.wy-codestage .wy-df{justify-content:stretch}.wy-dialog.wy-codestage .wy-df .wy-go{flex:1;height:44px!important}
+.wy-dialog .wy-err:empty{display:none}.wy-dialog .wy-err{color:#ff9b8f!important;font-size:12.5px;text-align:center;margin:0 0 8px}
+@media (max-width:420px){.wy-slot{height:50px;font-size:21px}.wy-otp{gap:6px}}
+.wy-dialog.wy-codestage .wy-spam{display:none!important}
+.wy-codehead .wy-cs b{display:block;margin-top:2px;word-break:normal;overflow-wrap:anywhere}
+.wy-codehead .wy-cs2{margin-top:8px;font-size:12px;color:rgba(235,235,245,.45)}
