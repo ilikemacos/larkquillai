@@ -136,7 +136,6 @@ pre,.md pre,.fpreview{background:rgba(0,0,0,.38)!important;border:1px solid rgba
 /* Phones: slimmer margins. */
 @media(max-width:640px){header{margin:8px 8px 0!important;top:8px!important;border-radius:20px!important}form#f{margin:0 8px 6px!important;border-radius:26px!important}#histbar{margin:8px!important}}
 /* Inverted (light) mode flips colours with a filter, which hides backdrop blur, so give panels some body there. */
-html.wy-inv header,html.wy-inv form#f,html.wy-inv #histbar{background:rgba(30,30,38,.82)!important}
 .wy-settings:focus,.wy-settings:focus-visible,.wy-dialog:focus,.wy-dialog:focus-visible{outline:none!important}
 .wy-sw{border:0!important}
 /* ---------- API dashboard (api.html) ---------- */
@@ -202,3 +201,69 @@ body>main>h2,main>section>h2{letter-spacing:-.01em}
 .wy-dialog.wy-codestage .wy-spam{display:none!important}
 .wy-codehead .wy-cs b{display:block;margin-top:2px;word-break:normal;overflow-wrap:anywhere}
 .wy-codehead .wy-cs2{margin-top:8px;font-size:12px;color:rgba(235,235,245,.45)}
+
+/* =========================================================================================
+   LIGHT GLASS ("inverted" mode). Replaces the old invert() filter, which killed the blur,
+   with a real light palette: pastel aurora, milky white glass, dark ink.
+   ========================================================================================= */
+html.wy-inv{
+  --g-bg:#f4f1fb;
+  --g-fill:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.42) 55%,rgba(255,255,255,.55));
+  --g-fill-strong:linear-gradient(145deg,rgba(255,255,255,.86),rgba(250,248,255,.74));
+  --g-line:rgba(30,20,60,.10);--g-line-hi:rgba(255,255,255,.9);
+  --g-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(255,255,255,.4),0 10px 30px rgba(60,40,120,.12);
+  --g-shadow-lg:inset 0 1px 0 rgba(255,255,255,1),0 24px 60px rgba(60,40,120,.18);
+  --rule:rgba(30,20,60,.08);--card:rgba(255,255,255,.55);--muted:#6b6880;--fg:#16141f;--bg:#f4f1fb;--accent:#16141f;
+  color-scheme:light;
+}
+html.wy-inv:root{background:var(--g-bg)!important}html.wy-inv:root body{background:transparent!important;color:var(--fg)!important}
+html.wy-inv::before{background:
+    radial-gradient(38vmax 30vmax at 18% 22%,rgba(255,130,70,.75),transparent 62%),
+    radial-gradient(42vmax 34vmax at 82% 18%,rgba(140,110,255,.75),transparent 62%),
+    radial-gradient(46vmax 36vmax at 62% 88%,rgba(60,205,215,.62),transparent 64%),
+    radial-gradient(30vmax 26vmax at 10% 90%,rgba(255,110,170,.6),transparent 62%),
+    radial-gradient(40vmax 26vmax at 50% 46%,rgba(190,170,255,.45),transparent 70%)}
+html.wy-inv .ctmode,html.wy-inv .ctmode button{border-color:rgba(30,20,60,.12)!important}
+html.wy-inv #wy-static{mix-blend-mode:multiply;opacity:.1!important}
+/* drop the old whole-panel inversion */
+html.wy-inv body>main,html.wy-inv .wy-dialog,html.wy-inv .wy-settings,html.wy-inv .wy-menu,html.wy-inv #histbar,
+html.wy-inv body>main img,html.wy-inv .wy-dialog img,html.wy-inv .wy-gbtn,html.wy-inv .wy-pick-ov,html.wy-inv .wy-intro-ov{filter:none!important}
+html.wy-inv body,html.wy-inv main,html.wy-inv header,html.wy-inv header h1,html.wy-inv .msg,html.wy-inv .bub,html.wy-inv .md,
+html.wy-inv .wy-dialog,html.wy-inv .wy-settings,html.wy-inv .wy-menu,html.wy-inv #histbar,html.wy-inv .hitem,html.wy-inv label{color:var(--fg)!important}
+html.wy-inv #status,html.wy-inv .foot,html.wy-inv .hhead .htitle,html.wy-inv .wy-hint,html.wy-inv .wy-spam{color:var(--muted)!important}
+html.wy-inv a{color:#c2410c}
+html.wy-inv button:not(.primary):not(.wy-go):not(#send):not(.wy-avatar):not(.wy-link),html.wy-inv select{color:var(--fg)!important;border-color:var(--g-line)!important;background:rgba(255,255,255,.55)!important}
+html.wy-inv button:not(.primary):not(.wy-go):not(#send):not(.wy-avatar):not(.wy-link):hover{background:rgba(255,255,255,.85)!important}
+html.wy-inv select option{background:#fff;color:#16141f}
+html.wy-inv form#f #q{color:var(--fg)!important}html.wy-inv form#f #q::placeholder{color:rgba(22,20,31,.42)!important}
+html.wy-inv .msg.u .bub{background:linear-gradient(145deg,rgba(255,170,120,.38),rgba(255,140,90,.18) 60%,rgba(255,255,255,.5))!important;border-color:rgba(255,140,90,.35)!important;color:#2a1306!important}
+html.wy-inv pre,html.wy-inv .md pre,html.wy-inv .fpreview,html.wy-inv .seditor,html.wy-inv .sdiff,html.wy-inv .newkey .k{background:rgba(255,255,255,.6)!important;border-color:var(--g-line)!important;color:#1d1b29!important}
+html.wy-inv :not(pre)>code{background:rgba(30,20,60,.07)!important;color:#1d1b29!important;border-color:var(--g-line)!important}
+html.wy-inv .wy-dialog input,html.wy-inv .wy-settings input,html.wy-inv .wy-settings textarea,html.wy-inv input[type=text]{background:rgba(255,255,255,.7)!important;color:var(--fg)!important;box-shadow:inset 0 1px 2px rgba(30,20,60,.08)!important}
+html.wy-inv .wy-seg,html.wy-inv .wy-dialog .wy-methods{background:rgba(30,20,60,.06)!important}
+html.wy-inv .wy-dialog .wy-methods button{background:transparent!important;color:var(--muted)!important}
+html.wy-inv .wy-dialog .wy-methods button.on{background:#fff!important;color:var(--fg)!important;box-shadow:0 1px 0 rgba(255,255,255,1) inset,0 2px 8px rgba(60,40,120,.15)!important}
+html.wy-inv .wy-bar{background:rgba(30,20,60,.08)!important}
+html.wy-inv .wy-sw{background:rgba(30,20,60,.15)!important}
+html.wy-inv .wy-codehead .wy-ct,html.wy-inv .wy-codehead .wy-cs b,html.wy-inv .wy-slot{color:var(--fg)!important}
+html.wy-inv .wy-codehead .wy-cs2{color:rgba(22,20,31,.45)}
+html.wy-inv .wy-slot{background:rgba(255,255,255,.7);border-color:rgba(30,20,60,.12);box-shadow:inset 0 1px 0 #fff,0 4px 12px rgba(60,40,120,.08)}
+html.wy-inv .wy-slot.filled{background:#fff;border-color:rgba(30,20,60,.2)}
+html.wy-inv .wy-dialog .wy-link,html.wy-inv .wy-dialog a{color:#c2410c!important}
+html.wy-inv .wy-dialog .wy-err{color:#c0262d!important}
+html.wy-inv .danger{color:#c0262d!important}
+html.wy-inv .msg.a .av img{box-shadow:0 0 0 1px rgba(30,20,60,.12),0 4px 12px rgba(60,40,120,.15)}
+html.wy-inv .hitem.on,html.wy-inv #histbar .hitem.on{background:rgba(255,255,255,.7)!important}
+html.wy-inv .hitem:hover{background:rgba(255,255,255,.5)!important}
+html.wy-inv .think,html.wy-inv .fcard,html.wy-inv .card{color:var(--fg)!important}
+/* ---------- "Turn on Touch ID" offer after sign-in ---------- */
+.wy-dialog.wy-bio{width:360px!important;text-align:center}
+.wy-bio .wy-db{padding:28px 24px 22px!important}
+.wy-bioicon{width:64px;height:64px;margin:0 auto 16px;border-radius:20px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M12 11v3.5a7 7 0 0 1-1.2 3.9'/%3E%3Cpath d='M8.5 9.6A3.5 3.5 0 0 1 15.5 11v2a10 10 0 0 1-.7 3.7'/%3E%3Cpath d='M6.3 7.5A6.5 6.5 0 0 1 18.5 11v1.5'/%3E%3Cpath d='M5.5 11v2.5a9 9 0 0 1-.6 3.2'/%3E%3Cpath d='M8.5 13v1a10 10 0 0 1-1.3 5'/%3E%3Cpath d='M18.4 15.5a13 13 0 0 1-.9 3'/%3E%3C/svg%3E") center/32px no-repeat,
+  linear-gradient(160deg,rgba(255,154,92,.6),rgba(124,92,255,.5));border:1px solid rgba(255,255,255,.32);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 12px 30px rgba(255,106,43,.28)}
+.wy-bio .wy-ct{font-size:18px;font-weight:650;letter-spacing:-.015em;color:var(--fg)}
+.wy-bio .wy-cs{margin:8px 0 20px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.wy-bio .wy-df{justify-content:center!important}.wy-bio .wy-df button{flex:1}
+.wy-bio .wy-df button{white-space:nowrap;padding:0 12px!important;font-size:13px}
+html.wy-inv .wy-dialog::backdrop{background:rgba(236,232,248,.45)!important}
