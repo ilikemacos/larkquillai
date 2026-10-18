@@ -33,7 +33,29 @@ svg text{fill:var(--muted);font:10px var(--mono)}
 .tabs{display:flex;gap:4px;margin-bottom:8px}.tabs button{height:28px;font-size:12px}.tabs button.on{background:var(--card);border-color:#555}
 pre{font-family:var(--mono);background:#0c0c0c;border:1px solid var(--rule);border-radius:4px;padding:12px;font-size:12px;overflow:auto;margin:0;white-space:pre}
 .signin{text-align:center;padding:48px 16px}.signin p{color:var(--muted)}
-</style><link rel="stylesheet" href="glass.css"></head><body>
+/* per-key usage, key reveal, curl */
+.spark{display:block}.keyrow{cursor:pointer}.keyrow.on td{background:rgba(127,127,160,.10)}
+.keytabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.keytabs button{height:28px;font-size:12px;border-radius:999px}.keytabs button.on{background:#1b1a24;color:#fff;border-color:#1b1a24}
+.newkey .k{display:flex;align-items:center;gap:8px}.newkey .k span{flex:1;min-width:0;word-break:break-all}
+.reveal-note{font-size:12px;color:var(--muted);margin-top:6px}
+.curlbox{position:relative;margin-top:12px}.curlbox pre{padding-right:84px}.curlbox button{position:absolute;top:8px;right:8px;height:26px;font-size:12px}
+</style><link rel="stylesheet" href="glass.css"><link id="wy-sky" rel="stylesheet" href="sky.css"><style>
+/* sky look for the dashboard: the time-of-day sky behind one milky sheet, so every label sits on a light surface (day and night) */
+html.wy-sky body{background:transparent!important;color:#1b1a24!important}
+html.wy-sky main{background:rgba(250,250,253,.88);border:1px solid rgba(255,255,255,.9);border-radius:28px;box-shadow:0 30px 80px rgba(20,20,50,.18);margin:8px auto 40px;padding:28px 28px 40px;-webkit-backdrop-filter:blur(30px) saturate(170%);backdrop-filter:blur(30px) saturate(170%)}
+html.wy-sky main h2{color:#1b1a24}html.wy-sky .sub,html.wy-sky th,html.wy-sky .tile .n,html.wy-sky .empty,html.wy-sky .reveal-note{color:rgba(27,26,36,.64)!important}
+html.wy-sky .card,html.wy-sky .tile{background:rgba(255,255,255,.85)!important;border-color:rgba(30,30,60,.08)!important;color:#1b1a24}
+html.wy-sky td,html.wy-sky th{border-bottom-color:rgba(30,30,60,.08)!important;color:#1b1a24}
+html.wy-sky pre,html.wy-sky .newkey .k{background:#fff!important;border-color:rgba(30,30,60,.1)!important;color:#1b1a24!important}
+html.wy-sky .newkey{background:rgba(255,246,236,.95)!important;border-color:#e0a060!important}
+html.wy-sky input[type=text]{background:#fff!important;color:#1b1a24!important;border-color:rgba(30,30,60,.15)!important}
+html.wy-sky button{color:#1b1a24;border-color:rgba(30,30,60,.18);background:rgba(255,255,255,.7);border-radius:999px}
+html.wy-sky .primary{background:#1b1a24!important;color:#fff!important}html.wy-sky .warn{color:#8a4a08!important}html.wy-sky .err{color:#a3261a!important}
+html.wy-sky svg text{fill:rgba(27,26,36,.6)}html.wy-sky .bar{background:rgba(30,30,60,.08)}html.wy-sky .bar i{background:#1b1a24}
+html.wy-sky header>a,html.wy-sky header>a:hover{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;height:auto!important}
+html.wy-sky header .who{color:var(--sky-ink-soft)!important}html.wy-sky header h1,html.wy-sky header .badge{color:var(--sky-ink)!important}
+@media(max-width:640px){html.wy-sky main{border-radius:20px;padding:18px 14px 30px;margin:4px 6px 30px}}
+</style><script type="module">import { startSky } from "./sky.js"; startSky();</script></head><body>
 <header><a href="index.html" style="display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none"><img class="logo" src="favicon.svg" alt=""><h1>WrenbyAI</h1></a><span class="badge">API</span><span class="who" id="who"></span></header>
 <main>
   <section id="signin" class="signin" hidden><h2>Sign in to manage API keys</h2><p>Sign in on WrenbyAI first, then come back to this page.</p><a href="index.html"><button class="primary">Open WrenbyAI</button></a></section>
@@ -42,16 +64,17 @@ pre{font-family:var(--mono);background:#0c0c0c;border:1px solid var(--rule);bord
     <div class="card">
       <form id="createForm" class="row"><input type="text" id="keyName" maxlength="60" placeholder="Key name, e.g. My game bot" aria-label="Key name"><button class="primary" id="createBtn">Create key</button></form>
       <div id="createErr" class="err" hidden></div>
-      <div id="newKey" class="newkey" hidden><strong>Your new key</strong><span class="k" id="newKeyVal"></span>
-        <div class="row"><button id="copyBtn">Copy</button><span class="warn">You won't see this key again. Copy it now.</span><button id="doneBtn" style="margin-left:auto">Done</button></div></div>
-      <div style="margin-top:14px;overflow:auto"><table><thead><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th>30-day use</th><th></th></tr></thead><tbody id="keys"></tbody></table></div>
+      <div id="newKey" class="newkey" hidden><strong>Your new key</strong><div class="k"><span id="newKeyVal" class="mono"></span><button id="revealBtn" type="button">Reveal</button></div>
+        <div class="row"><button id="copyBtn" class="primary" type="button">Copy key</button><span class="warn" id="keyWarn">You'll only see this key once. Copy it now and keep it somewhere safe.</span><button id="doneBtn" type="button" style="margin-left:auto">Done</button></div>
+        <div class="curlbox"><pre id="newCurl"></pre><button id="copyCurl" type="button">Copy</button></div><div class="reveal-note">Ready to paste: a test request with your new key. It disappears when you press Done.</div></div>
+      <div style="margin-top:14px;overflow:auto"><table><thead><tr><th>Name</th><th>Key</th><th>Created</th><th>Last used</th><th>30-day use</th><th>Trend</th><th></th></tr></thead><tbody id="keys"></tbody></table></div>
     </div>
 
     <h2>Usage today</h2><p class="sub">API calls share your daily token limits with chat. They reset at 00:00 UTC<span id="resets"></span>.</p>
     <div class="tiles" id="tiles"></div>
 
-    <h2>Last 30 days</h2><p class="sub">Tokens per day used by your API keys.</p>
-    <div class="card"><svg id="chart" viewBox="0 0 800 200" width="100%" role="img" aria-label="Daily API token usage"></svg><div id="byModel" class="sub" style="margin:8px 0 0"></div></div>
+    <h2>Last 30 days</h2><p class="sub">Tokens per day used by your API keys. Pick a key to see just its usage.</p>
+    <div class="card"><div class="keytabs" id="keyTabs"></div><svg id="chart" viewBox="0 0 800 200" width="100%" role="img" aria-label="Daily API token usage"></svg><div id="byModel" class="sub" style="margin:8px 0 0"></div></div>
   </div>
 
   <h2>Connection details</h2><p class="sub">Paste these into any app with an "OpenAI-compatible" or "Generic OpenAI" option, like AnythingLLM, LibreChat, Open WebUI, or the OpenAI SDKs.</p>
@@ -64,7 +87,7 @@ pre{font-family:var(--mono);background:#0c0c0c;border:1px solid var(--rule);bord
   </table>
   <table style="margin-top:12px"><thead><tr><th>Model name</th><th>Context window</th><th>Daily tokens</th></tr></thead><tbody id="cModelRows"><tr><td colspan="3" class="sub">Loading models…</td></tr></tbody></table></div>
 
-  <h2>Quickstart</h2><p class="sub">The API is OpenAI-compatible. Base URL <code id="baseUrl"></code>. Models: <code>wrenby-chirp-1</code>, <code>wrenby-trill-1</code>, <code>wrenby-aria-1.5</code>, <code>wrenby-chorus-0.7</code>.</p>
+  <h2>Quickstart</h2><p class="sub">Copy, set <code>WRENBY_API_KEY</code>, and run.</p><div class="curlbox" style="margin-bottom:12px"><pre id="curlQuick"></pre><button id="copyQuick" type="button">Copy</button></div><p class="sub">The API is OpenAI-compatible. Base URL <code id="baseUrl"></code>. Models: <code>wrenby-chirp-1</code>, <code>wrenby-trill-1</code>, <code>wrenby-aria-1.5</code>, <code>wrenby-chorus-0.7</code>.</p>
   <div class="tabs" id="tabs"><button data-t="curl" class="on">curl</button><button data-t="python">Python</button><button data-t="js">JavaScript</button><button data-t="anythingllm">AnythingLLM</button></div>
   <pre id="code"></pre>
   <p class="sub" style="margin-top:12px">Limits per key: 20 requests a minute and 300 a day (Chorus counts as 3, max 30 a day). Errors use the OpenAI format: 401 bad key, 400 bad request, 429 rate or token limit.</p>
@@ -106,17 +129,27 @@ async function load() {
   const j = await r.json(); if (!r.ok) { $("createErr").textContent = j.error || "Couldn't load keys."; $("createErr").hidden = false; return; }
   $("signin").hidden = true; $("app").hidden = false;
   try { const me = await (await api("/api/auth/me")).json(); if (me?.user?.email) $("who").textContent = me.user.email; } catch {}
-  renderKeys(j.keys); renderTiles(j.limits); renderChart(j.daily);
+  KEYS = j.keys; DAILY = j.daily || []; renderKeys(j.keys); renderTiles(j.limits); renderKeyTabs(); renderChart(DAILY.filter(r => !SEL || r.key_id === SEL));
 }
+let KEYS = [], DAILY = [], SEL = null;
+const last30 = () => { const out = [], now = new Date(); for (let i = 29; i >= 0; i--) out.push(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i)).toISOString().slice(0, 10)); return out; };
+function sparkFor(id) { const days = last30(), per = Object.fromEntries(days.map(d => [d, 0])); for (const r of DAILY) if (r.key_id === id && r.day in per) per[r.day] += r.tokens;
+  const v = days.map(d => per[d]), mx = Math.max(1, ...v), W = 90, H = 22, ns = "http://www.w3.org/2000/svg", s = document.createElementNS(ns, "svg");
+  s.setAttribute("viewBox", `0 0 ${W} ${H}`); s.setAttribute("width", W); s.setAttribute("height", H); s.setAttribute("class", "spark"); s.setAttribute("role", "img"); s.setAttribute("aria-label", "30-day token trend");
+  const pl = document.createElementNS(ns, "polyline"); pl.setAttribute("points", v.map((x, i) => `${(i * (W - 2)) / 29 + 1},${H - 2 - (x / mx) * (H - 4)}`).join(" ")); pl.setAttribute("fill", "none"); pl.setAttribute("stroke", v.some(Boolean) ? "#ff6a2b" : "#bbb"); pl.setAttribute("stroke-width", "1.6"); s.append(pl); return s; }
+function renderKeyTabs() { const t = $("keyTabs"); t.replaceChildren(); if (!KEYS.length) return; if (SEL && !KEYS.some(k => k.id === SEL)) SEL = null;
+  for (const k of [{ id: null, name: "All keys" }, ...KEYS]) { const b = el("button", { type: "button", textContent: k.name, className: SEL === k.id ? "on" : "" }); b.onclick = () => selectKey(k.id); t.append(b); } }
+function selectKey(id) { SEL = id; renderKeyTabs(); document.querySelectorAll(".keyrow").forEach(r => r.classList.toggle("on", r.dataset.id === id)); renderChart(DAILY.filter(r => !SEL || r.key_id === SEL)); }
 function renderKeys(keys) {
   const tb = $("keys"); tb.replaceChildren();
-  if (!keys.length) { tb.append(el("tr", {}, el("td", { colSpan: 6, className: "empty", textContent: "No keys yet. Create one above." }))); }
+  if (!keys.length) { tb.append(el("tr", {}, el("td", { colSpan: 7, className: "empty", textContent: "No keys yet. Create one above." }))); }
   for (const k of keys) {
     const del = el("button", { className: "danger", textContent: "Revoke" });
     del.onclick = async () => { if (!confirm(`Revoke "${k.name}"? Apps using it will stop working right away.`)) return; del.disabled = true;
       const r = await api("/api/keys?id=" + encodeURIComponent(k.id), { method: "DELETE" }); if (r.ok) load(); else { del.disabled = false; alert("Couldn't revoke the key."); } };
-    tb.append(el("tr", {}, el("td", { textContent: k.name }), el("td", { className: "mono", textContent: k.prefix + "…" }), el("td", { textContent: when(k.created_at) }),
-      el("td", { textContent: when(k.last_used_at) }), el("td", { className: "mono", textContent: `${k.requests_30d} req · ${fmt(k.tokens_30d)} tok` }), el("td", { style: "text-align:right" }, del)));
+    const tr = el("tr", { className: "keyrow" + (SEL === k.id ? " on" : ""), title: "Show this key's usage in the chart" }, el("td", { textContent: k.name }), el("td", { className: "mono", textContent: k.prefix + "…" }), el("td", { textContent: when(k.created_at) }),
+      el("td", { textContent: when(k.last_used_at) }), el("td", { className: "mono", textContent: `${k.requests_30d} req · ${fmt(k.tokens_30d)} tok` }), el("td", {}, sparkFor(k.id)), el("td", { style: "text-align:right" }, del));
+    tr.dataset.id = k.id; tr.onclick = e => { if (!e.target.closest("button")) selectKey(SEL === k.id ? null : k.id); }; tb.append(tr);
   }
   $("createBtn").disabled = keys.length >= 5; $("keyName").placeholder = keys.length >= 5 ? "Revoke a key to create another" : "Key name, e.g. My game bot";
 }
@@ -129,27 +162,37 @@ function renderTiles(limits) {
 }
 function renderChart(daily) {
   const svg = $("chart"), W = 800, H = 200, P = { l: 44, r: 10, t: 10, b: 24 }; svg.replaceChildren();
-  const days = []; const now = new Date(); for (let i = 29; i >= 0; i--) { const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i)); days.push(d.toISOString().slice(0, 10)); }
+  const days = last30();
   const per = Object.fromEntries(days.map(d => [d, 0])), byMode = {};
   for (const r of daily || []) { if (r.day in per) per[r.day] += r.tokens; byMode[r.mode] = (byMode[r.mode] || 0) + r.tokens; }
   const vals = days.map(d => per[d]), max = Math.max(1, ...vals), ns = "http://www.w3.org/2000/svg";
   const mk = (tag, attrs, text) => { const e = document.createElementNS(ns, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (text != null) e.textContent = text; svg.append(e); return e; };
   const x = i => P.l + (i * (W - P.l - P.r)) / (days.length - 1), y = v => H - P.b - (v / max) * (H - P.t - P.b);
-  for (const f of [0, .5, 1]) { mk("line", { x1: P.l, x2: W - P.r, y1: y(max * f), y2: y(max * f), stroke: "#262626" }); mk("text", { x: P.l - 6, y: y(max * f) + 3, "text-anchor": "end" }, fmt(Math.round(max * f))); }
+  for (const f of [0, .5, 1]) { mk("line", { x1: P.l, x2: W - P.r, y1: y(max * f), y2: y(max * f), stroke: "rgba(127,127,160,.25)" }); mk("text", { x: P.l - 6, y: y(max * f) + 3, "text-anchor": "end" }, fmt(Math.round(max * f))); }
   const pts = vals.map((v, i) => `${x(i)},${y(v)}`).join(" ");
   mk("polygon", { points: `${x(0)},${y(0)} ${pts} ${x(days.length - 1)},${y(0)}`, fill: "rgba(255,106,43,.12)" });
   mk("polyline", { points: pts, fill: "none", stroke: "#ff6a2b", "stroke-width": 2, "stroke-linejoin": "round" });
   for (const i of [0, 10, 20, 29]) mk("text", { x: x(i), y: H - 6, "text-anchor": i === 0 ? "start" : i === 29 ? "end" : "middle" }, days[i].slice(5));
   const total = vals.reduce((a, b) => a + b, 0);
-  $("byModel").textContent = total ? "By model: " + Object.entries(byMode).map(([m, n]) => `${({ spark: "Chirp 1", turbo: "Trill 1", forge: "Aria 1.5", zenith: "Chorus 0.7" })[m] || m} ${fmt(n)}`).join(" · ") : "No API usage yet.";
+  $("byModel").textContent = total ? "By model: " + Object.entries(byMode).map(([m, n]) => `${({ spark: "Chirp 1", turbo: "Trill 1", forge: "Aria 1.5", zenith: "Chorus 0.7" })[m] || m} ${fmt(n)}`).join(" · ") : (SEL ? "No usage for this key in the last 30 days." : "No API usage yet.");
 }
 
 $("createForm").onsubmit = async e => { e.preventDefault(); $("createErr").hidden = true; $("createBtn").disabled = true;
   try { const r = await api("/api/keys", { method: "POST", body: { name: $("keyName").value } }); const j = await r.json();
     if (!r.ok) { $("createErr").textContent = j.error || "Couldn't create the key."; $("createErr").hidden = false; return; }
-    $("newKeyVal").textContent = j.key; $("newKey").hidden = false; $("keyName").value = ""; await load();
+    showNewKey(j.key); $("keyName").value = ""; await load();
   } catch { $("createErr").textContent = "Network error. Try again."; $("createErr").hidden = false; } finally { $("createBtn").disabled = false; } };
-$("copyBtn").onclick = async () => { try { await navigator.clipboard.writeText($("newKeyVal").textContent); $("copyBtn").textContent = "Copied"; setTimeout(() => $("copyBtn").textContent = "Copy", 1500); } catch {} };
-$("doneBtn").onclick = () => { $("newKeyVal").textContent = ""; $("newKey").hidden = true; };
+// Copy-once reveal: the full key lives only in this closure until Done; it's masked unless revealed, and never re-fetchable.
+let NEWKEY = "", shown = false;
+const mask = k => k.slice(0, 8) + "•".repeat(20) + k.slice(-4);
+const curlFor = k => `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer ${k}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "wrenby-chirp-1", "messages": [{"role": "user", "content": "Say hello"}]}'`;
+function showNewKey(k) { NEWKEY = k; shown = false; $("newKeyVal").textContent = mask(k); $("revealBtn").textContent = "Reveal"; $("copyBtn").textContent = "Copy key";
+  $("newCurl").textContent = curlFor(mask(k)); $("newKey").hidden = false; }
+$("revealBtn").onclick = () => { if (!NEWKEY) return; shown = !shown; $("newKeyVal").textContent = shown ? NEWKEY : mask(NEWKEY); $("newCurl").textContent = curlFor(shown ? NEWKEY : mask(NEWKEY)); $("revealBtn").textContent = shown ? "Hide" : "Reveal"; };
+$("copyBtn").onclick = async () => { if (!NEWKEY) return; try { await navigator.clipboard.writeText(NEWKEY); $("copyBtn").textContent = "Copied"; $("keyWarn").textContent = "Copied. Store it now: once you press Done it's gone from this page for good."; } catch { $("copyBtn").textContent = "Copy failed"; } };
+$("copyCurl").onclick = async () => { if (!NEWKEY) return; try { await navigator.clipboard.writeText(curlFor(NEWKEY)); $("copyCurl").textContent = "Copied"; setTimeout(() => $("copyCurl").textContent = "Copy", 1500); } catch {} };
+$("doneBtn").onclick = () => { NEWKEY = ""; shown = false; $("newKeyVal").textContent = ""; $("newCurl").textContent = ""; $("newKey").hidden = true; };
+$("curlQuick").textContent = `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer $WRENBY_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "wrenby-chirp-1", "messages": [{"role": "user", "content": "Say hello"}]}'`;
+$("copyQuick").onclick = async () => { try { await navigator.clipboard.writeText($("curlQuick").textContent); $("copyQuick").textContent = "Copied"; setTimeout(() => $("copyQuick").textContent = "Copy", 1500); } catch {} };
 load();
 </script></body></html>

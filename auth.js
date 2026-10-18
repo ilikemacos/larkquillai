@@ -65,10 +65,11 @@ function buildChrome() {
   const slot = el("span", "wy-authslot"); slot.style.marginLeft = "8px"; header.appendChild(slot); S.els.slot = slot;
   // sidebar
   const bar = el("aside"); bar.id = "histbar"; bar.hidden = true;
-  bar.innerHTML = '<div class="hhead"><span class="htitle">Chats</span><button class="hnew">New chat</button></div><div class="hlist"></div>';
+  bar.innerHTML = '<div class="hhead"><span class="htitle">Chats</span><button class="hnew">New chat</button></div><div class="hsearch"><input type="search" placeholder="Search chats" aria-label="Search chats" autocomplete="off"></div><div class="hlist"></div>';
   document.body.insertBefore(bar, document.body.firstChild);
   bar.querySelector(".hnew").onclick = () => { S.chatId = null; if (S.opts.onNewChat) S.opts.onNewChat(); markActive(); if (window.innerWidth <= 860) bar.classList.remove("open"); };
   S.els.bar = bar; S.els.list = bar.querySelector(".hlist");
+  const sq = bar.querySelector(".hsearch input"); sq.oninput = () => { S.filter = sq.value; renderList(); };
 }
 
 function render() {
@@ -81,6 +82,7 @@ function render() {
     S.els.bar.hidden = true;
     const b = el("button", "", "Sign in"); b.onclick = openSignin; slot.appendChild(b);
   }
+  for (const f of S.listeners || []) { try { f(S.user); } catch {} }
 }
 
 function toggleMenu() {
@@ -225,16 +227,28 @@ async function logout() {
 function renderList() {
   const list = S.els.list; if (!list) return; list.innerHTML = "";
   if (!S.chats.length) { const e = el("div", "hempty", "No chats yet"); e.style.cssText = "padding:10px;color:var(--muted);font-size:12px"; list.appendChild(e); return; }
-  for (const c of S.chats) {
-    const row = el("div", "hitem" + (c.id === S.chatId ? " on" : ""));
-    const name = el("span", "hname", c.title || "New chat"); row.appendChild(name);
-    const act = el("span", "hact");
-    const rn = el("button", "", "\u270e"); rn.title = "Rename"; rn.onclick = (e) => { e.stopPropagation(); renameChat(c); };
-    const dl = el("button", "", "\u00d7"); dl.title = "Delete"; dl.onclick = (e) => { e.stopPropagation(); deleteChat(c); };
-    act.append(rn, dl); row.appendChild(act);
-    row.onclick = () => loadChat(c.id);
-    list.appendChild(row);
-  }
+  // search filters by title; pinned chats (server-side pinned_at) are listed first under their own heading
+  const f = String(S.filter || "").trim().toLowerCase(), shown = S.chats.filter(c => !f || String(c.title || "New chat").toLowerCase().includes(f));
+  if (!shown.length) { const e = el("div", "hempty", "No chats match \u201c" + S.filter.trim() + "\u201d"); e.style.cssText = "padding:10px;color:var(--muted);font-size:12px"; list.appendChild(e); return; }
+  const pinned = shown.filter(c => c.pinned_at), rest = shown.filter(c => !c.pinned_at);
+  const group = (label, items) => { if (!items.length) return; if (pinned.length) list.appendChild(el("div", "hgroup", label));
+    for (const c of items) {
+      const row = el("div", "hitem" + (c.id === S.chatId ? " on" : "") + (c.pinned_at ? " pinned" : ""));
+      const name = el("span", "hname", c.title || "New chat"); name.title = c.title || "New chat"; row.appendChild(name);
+      const act = el("span", "hact");
+      const pn = el("button", "hpin", c.pinned_at ? "\u2605" : "\u2606"); pn.title = c.pinned_at ? "Unpin" : "Pin"; pn.setAttribute("aria-label", pn.title); pn.onclick = (e) => { e.stopPropagation(); pinChat(c); };
+      const rn = el("button", "", "\u270e"); rn.title = "Rename"; rn.onclick = (e) => { e.stopPropagation(); renameChat(c); };
+      const dl = el("button", "", "\u00d7"); dl.title = "Delete"; dl.onclick = (e) => { e.stopPropagation(); deleteChat(c); };
+      act.append(pn, rn, dl); row.appendChild(act);
+      row.onclick = () => loadChat(c.id);
+      list.appendChild(row);
+    } };
+  group("Pinned", pinned); group("Recent", rest);
+}
+async function pinChat(c) {
+  const want = !c.pinned_at; c.pinned_at = want ? new Date().toISOString() : null; renderList();
+  try { const r = await api("/api/chats", { method: "POST", body: { action: "pin", id: c.id, pinned: want } }); if (!r.ok) throw new Error(); await refreshChats(); }
+  catch { c.pinned_at = want ? null : new Date().toISOString(); renderList(); }
 }
 function markActive() { document.querySelectorAll(".hitem").forEach(r => r.classList.remove("on")); renderList(); }
 
@@ -478,7 +492,7 @@ function injectStyle() {
 .hitem{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:4px;cursor:pointer;font-size:13px;color:var(--fg)}
 .hitem:hover{background:var(--card)}.hitem.on{background:var(--card);border:1px solid var(--rule)}
 .hitem .hname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hitem .hact{opacity:0;display:flex;gap:2px;flex:none}.hitem:hover .hact{opacity:1}
+.hitem .hact{opacity:0;display:flex;gap:2px;flex:none}.hitem:hover .hact,.hitem.pinned .hact .hpin{opacity:1}.hitem.pinned .hact{opacity:1}.hitem.pinned:not(:hover) .hact button:not(.hpin){display:none}
 .hact button{height:22px;width:22px;padding:0;font-size:12px;border:0;background:transparent;color:var(--muted)}
 .hact button:hover{color:var(--fg);background:transparent}
 .wy-avatar{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#111;font-weight:700;border:0;display:grid;place-items:center;cursor:pointer;padding:0;font-size:13px}
@@ -512,6 +526,7 @@ function injectStyle() {
 
 // Used by cloud tasks.
 export const authInfo = () => ({ base: S.base, token: S.token, user: S.user });
+export const onAuthChange = fn => { (S.listeners ||= []).push(fn); };
 // Used by the Settings page.
 export { setPassword, logout };
 export const reloadMe = async () => { const r = await api("/api/auth/me?usage=1"); const j = await r.json(); return j; };

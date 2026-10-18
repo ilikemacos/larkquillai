@@ -42,12 +42,15 @@ export const CREATE_FILE = { type: "function", function: { name: "create_file", 
 export async function streamOnce(body, on = {}, signal) {
   const tok = typeof localStorage !== "undefined" && localStorage.getItem("wy.token");
   const res = await fetch(API, { method: "POST", signal, headers: { "content-type": "application/json", ...(tok ? { authorization: "Bearer " + tok } : {}) }, body: JSON.stringify(body) });
-  if (!res.ok) { let m = res.status, code; try { const j = await res.json(); m = j.error || m; code = j.code; } catch {} throw new Error(code === "token_limit" ? String(m) : res.status === 429 ? "Too many messages. Try again in a minute." : String(m)); }
+  if (!res.ok) { let m = res.status, code; try { const j = await res.json(); m = j.error || m; code = j.code; } catch {}
+    const e = new Error(code === "token_limit" || code === "quota_limit" || (res.status === 429 && code) ? String(m) : res.status === 429 ? "Too many messages. Try again in a minute." : String(m)); e.code = code; e.status = res.status; throw e; }
   const rd = res.body.getReader(), dec = new TextDecoder(); let buf = "", content = "", reasoning = "", err = null; const tc = [];
   for (;;) { const { value, done } = await rd.read(); if (done) break; buf += dec.decode(value, { stream: true }); let i;
     while ((i = buf.indexOf("\n\n")) >= 0) { const ev = buf.slice(0, i).trim(); buf = buf.slice(i + 2); if (!ev.startsWith("data:")) continue; const d = ev.slice(5).trim(); if (d === "[DONE]") continue;
       let j; try { j = JSON.parse(d); } catch { continue; }
       if (j.type === "search") { on.search?.(j); continue; }
+      if (j.type === "quota") { on.quota?.(j); continue; }
+      if (j.type === "notice") { on.notice?.(j); continue; }
       if (j.error) { err = j; continue; }
       if (j.reasoning) { reasoning += j.reasoning; on.reasoning?.(reasoning, j.reasoning); }
       if (j.content) { content += j.content; on.content?.(content, j.content); }
@@ -60,8 +63,10 @@ export async function streamOnce(body, on = {}, signal) {
 // Agent loop: runs create_file calls via onFile(name, content) -> path. Returns final text + files.
 export async function runAgent(messages, { tier = "spark", maxTokens = 6144, on = {}, onFile, signal, noSearch } = {}) {
   const msgs = [...messages], files = []; let text = "";
-  for (let step = 0; step < 6; step++) {
-    const req = () => streamOnce({ messages: msgs, tools: [CREATE_FILE], max_tokens: maxTokens, tier, no_search: noSearch || step > 0 }, { ...on, content: (c, d) => on.content?.(text + c, d) }, signal);
+  // GLM 5.3 Flash / Wrenby Code and image messages: one request per message (each counts against a daily quota), no tools
+  const single = tier === "flash" || tier === "code" || msgs.some(m => Array.isArray(m.content));
+  for (let step = 0; step < (single ? 1 : 6); step++) {
+    const req = () => streamOnce({ messages: msgs, tools: single ? undefined : [CREATE_FILE], max_tokens: maxTokens, tier, no_search: noSearch || step > 0 }, { ...on, content: (c, d) => on.content?.(text + c, d) }, signal);
     let r; try { r = await req(); } catch (e) { if (e.code !== "no_answer" || e.reason === "length" || e.reason === "timeout") throw e; on.retry?.(); r = await req(); } // one retry when the service went quiet
     text += r.content;
     if (!r.tool_calls.length) break;
