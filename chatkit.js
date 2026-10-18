@@ -1,6 +1,6 @@
 // WrenbyAI chat kit: shared composer + message UI for the Vercel app and the GitHub Pages copy.
 //  - image attachments (button, paste, drag and drop) with client-side downscale (max side 1568px) + WebP/JPEG compression
-//  - model pill (Chirp/Trill/Aria/Chorus + GLM 5.3 Flash and Wrenby Code with "N left today"), persisted per user
+//  - model pill (Chirp/Trill/Aria/Chorus), persisted per user
 //  - Stop button while streaming, Retry buttons, message actions (copy / regenerate / edit and resend)
 //  - code blocks: language label + copy button + highlight.js (vendored in ./md/) with a light sky palette
 // Styles live in sky.css (it is kept as the last stylesheet, so they win over older themes).
@@ -9,10 +9,8 @@ export const MODELS = [
   { id: "turbo",  name: "Trill 1",       hint: "Fast, longer answers" },
   { id: "forge",  name: "Aria 1.5",      hint: "Balanced, big memory" },
   { id: "zenith", name: "Chorus 0.7",    hint: "Deepest, slower, uses the most" },
-  { id: "flash",  name: "GLM 5.3 Flash", hint: "Fast, sees images", quota: true },
-  { id: "code",   name: "Wrenby Code",   hint: "Coding, thinks harder", quota: true },
 ];
-export const QUOTA_TIERS = new Set(["flash", "code"]);
+export const QUOTA_TIERS = new Set([]);
 export const modelName = id => (MODELS.find(m => m.id === id) || {}).name || id;
 const MAX_IMAGES = 4, MAX_SIDE = 1568, TOTAL_CHARS = 3_900_000, PER_IMAGE_CHARS = 950_000;
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -93,10 +91,7 @@ export function initChatKit(o) {
     st.images.forEach((im, i) => { const c = el("div", "wy-chip"); const img = el("img"); img.src = im.url; img.alt = im.name; const x = el("button", "wy-chipx", "×"); x.type = "button"; x.title = "Remove " + im.name; x.setAttribute("aria-label", "Remove image");
       x.onclick = () => { st.images.splice(i, 1); paintTray(); }; c.append(img, x); tray.insertBefore(c, tray.querySelector(".wy-traynote")); });
     if (!st.images.length) return note("");
-    const target = QUOTA_TIERS.has(st.tier) ? st.tier : "flash", s = st.quota?.[target];
-    if (!st.signedIn) note("Images are read by the backup vision model. Sign in to use GLM 5.3 Flash.");
-    else if (s && s.left === 0) note(`You're out of today's ${modelName(target)} requests, so ` + (target === st.tier ? "this can't be sent until tomorrow. Pick another model to use the backup vision model." : "images go to the backup vision model."), target === st.tier);
-    else note(`${modelName(target)} reads images` + (s ? ` · uses 1 of ${s.left} left today` : "") + ".");
+    note("Images are read by the vision model.");
   }
   async function addFiles(files) {
     const imgs = files.filter(f => /^image\//.test(f.type)); if (!imgs.length) return;
