@@ -1,6 +1,6 @@
 // Settings → General for the GitHub Pages site (the full Settings lives in the Vercel/desktop app).
 // Same per-user prefs as there: wy.static { on, shimmer, chunky } and wy.inv.
-import { staticPrefs, setStaticPrefs, isInverted, setInverted } from "./static.js";
+import { staticPrefs, setStaticPrefs, isInverted, setInverted, SKY } from "./static.js";
 import { getCompanion, setCompanion, COMPANIONS } from "./companion.js";
 const CSS = `.wy-sl{padding:0;border:1px solid #262626;border-radius:18px;background:#0e0e0e;color:#ececec;width:min(520px,94vw)}
 .wy-sl::backdrop{background:#000a}.wy-sl .b{padding:22px 26px}.wy-sl h2{font-size:18px;margin:0 0 2px}.wy-sl .sub{color:#8a8a8a;font-size:13px;margin:0 0 8px}
@@ -19,10 +19,10 @@ export function openSettings() {
   b.append(el("h2", "", "General"), el("p", "sub", "How WrenbyAI looks."),
     (() => { const seg = el("div", "seg"); for (const [c, n] of Object.entries(COMPANIONS)) { const x = el("button", getCompanion() === c ? "on" : "", n); x.type = "button"; x.onclick = () => { setCompanion(c); seg.querySelectorAll("button").forEach(y => y.classList.toggle("on", y === x)); }; seg.append(x); }
       return row("Companion", "Who keeps you company while WrenbyAI works: Wrenby, or Milyy and her ball. Saved to your account.", seg); })(),
-    row("Pixel background", "The moving pixel static at the edges. Off keeps a plain background; clicking the background still inverts.", sw(p.on !== false, v => setStaticPrefs({ on: v }))),
+    ...(SKY ? [] : [row("Pixel background", "The moving pixel static at the edges. Off keeps a plain background; clicking the background still inverts.", sw(p.on !== false, v => setStaticPrefs({ on: v }))),
     row("Inverted theme", "White background, black squares. You can also click the empty background.", sw(isInverted(), v => setInverted(v))),
     row("Shimmer", "Squares flicker slowly. Off keeps the static still.", sw(p.shimmer, v => setStaticPrefs({ shimmer: v }))),
-    row("Chunky squares", "Twice the square size.", sw(p.chunky, v => setStaticPrefs({ chunky: v }))));
+    row("Chunky squares", "Twice the square size.", sw(p.chunky, v => setStaticPrefs({ chunky: v })))]));
   dlg.append(x, b); document.body.append(dlg); dlg.addEventListener("close", () => dlg.remove()); dlg.showModal();
 }
 export function initSettings() {

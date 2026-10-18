@@ -232,8 +232,8 @@ html.wy-inv body,html.wy-inv main,html.wy-inv header,html.wy-inv header h1,html.
 html.wy-inv .wy-dialog,html.wy-inv .wy-settings,html.wy-inv .wy-menu,html.wy-inv #histbar,html.wy-inv .hitem,html.wy-inv label{color:var(--fg)!important}
 html.wy-inv #status,html.wy-inv .foot,html.wy-inv .hhead .htitle,html.wy-inv .wy-hint,html.wy-inv .wy-spam{color:var(--muted)!important}
 html.wy-inv a{color:#c2410c}
-html.wy-inv button:not(.primary):not(.wy-go):not(#send):not(.wy-avatar):not(.wy-link),html.wy-inv select{color:var(--fg)!important;border-color:var(--g-line)!important;background:rgba(255,255,255,.55)!important}
-html.wy-inv button:not(.primary):not(.wy-go):not(#send):not(.wy-avatar):not(.wy-link):hover{background:rgba(255,255,255,.85)!important}
+html.wy-inv :where(button:not(.primary,.wy-go,#send,.wy-avatar,.wy-link)),html.wy-inv :where(select){color:var(--fg)!important;border-color:var(--g-line)!important;background:rgba(255,255,255,.55)!important}
+html.wy-inv :where(button:not(.primary,.wy-go,#send,.wy-avatar,.wy-link)):hover{background:rgba(255,255,255,.85)!important}
 html.wy-inv select option{background:#fff;color:#16141f}
 html.wy-inv form#f #q{color:var(--fg)!important}html.wy-inv form#f #q::placeholder{color:rgba(22,20,31,.42)!important}
 html.wy-inv .msg.u .bub{background:linear-gradient(145deg,rgba(255,170,120,.38),rgba(255,140,90,.18) 60%,rgba(255,255,255,.5))!important;border-color:rgba(255,140,90,.35)!important;color:#2a1306!important}
