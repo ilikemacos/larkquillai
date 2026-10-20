@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>WrenbyAI API</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><meta name="theme-color" content="#111111">
+<title>LarkquillAI API</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><meta name="theme-color" content="#111111">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#111111;--fg:#ececec;--muted:#9a9a9a;--rule:#2a2a2a;--card:#181818;--accent:#ff6a2b;--warn:#e0a03a;--bad:#e06a5a;--sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
@@ -56,11 +56,11 @@ html.wy-sky header>a,html.wy-sky header>a:hover{background:transparent!important
 html.wy-sky header .who{color:var(--sky-ink-soft)!important}html.wy-sky header h1,html.wy-sky header .badge{color:var(--sky-ink)!important}
 @media(max-width:640px){html.wy-sky main{border-radius:20px;padding:18px 14px 30px;margin:4px 6px 30px}}
 </style><script type="module">import { startSky } from "./sky.js"; startSky();</script></head><body>
-<header><a href="index.html" style="display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none"><img class="logo" src="favicon.svg" alt=""><h1>WrenbyAI</h1></a><span class="badge">API</span><span class="who" id="who"></span></header>
+<header><a href="index.html" style="display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none"><img class="logo" src="favicon.svg" alt=""><h1>LarkquillAI</h1></a><span class="badge">API</span><span class="who" id="who"></span></header>
 <main>
-  <section id="signin" class="signin" hidden><h2>Sign in to manage API keys</h2><p>Sign in on WrenbyAI first, then come back to this page.</p><a href="index.html"><button class="primary">Open WrenbyAI</button></a></section>
+  <section id="signin" class="signin" hidden><h2>Sign in to manage API keys</h2><p>Sign in on LarkquillAI first, then come back to this page.</p><a href="index.html"><button class="primary">Open LarkquillAI</button></a></section>
   <div id="app" hidden>
-    <h2>API keys</h2><p class="sub">Use a key to call WrenbyAI from your own code. Keys work like passwords, so keep them secret. Up to 5 active keys.</p>
+    <h2>API keys</h2><p class="sub">Use a key to call LarkquillAI from your own code. Keys work like passwords, so keep them secret. Up to 5 active keys.</p>
     <div class="card">
       <form id="createForm" class="row"><input type="text" id="keyName" maxlength="60" placeholder="Key name, e.g. My game bot" aria-label="Key name"><button class="primary" id="createBtn">Create key</button></form>
       <div id="createErr" class="err" hidden></div>
@@ -87,15 +87,16 @@ html.wy-sky header .who{color:var(--sky-ink-soft)!important}html.wy-sky header h
   </table>
   <table style="margin-top:12px"><thead><tr><th>Model name</th><th>Context window</th><th>Daily tokens</th></tr></thead><tbody id="cModelRows"><tr><td colspan="3" class="sub">Loading models…</td></tr></tbody></table></div>
 
-  <h2>Quickstart</h2><p class="sub">Copy, set <code>WRENBY_API_KEY</code>, and run.</p><div class="curlbox" style="margin-bottom:12px"><pre id="curlQuick"></pre><button id="copyQuick" type="button">Copy</button></div><p class="sub">The API is OpenAI-compatible. Base URL <code id="baseUrl"></code>. Models: <code>wrenby-chirp-1</code>, <code>wrenby-trill-1</code>, <code>wrenby-aria-1.5</code>, <code>wrenby-chorus-0.7</code>.</p>
+  <h2>Quickstart</h2><p class="sub">Copy, set <code>LARKQUILL_API_KEY</code>, and run.</p><div class="curlbox" style="margin-bottom:12px"><pre id="curlQuick"></pre><button id="copyQuick" type="button">Copy</button></div><p class="sub">The API is OpenAI-compatible. Base URL <code id="baseUrl"></code>. Models: <code>larkquill-chirp-1</code>, <code>larkquill-trill-1</code>, <code>larkquill-aria-1.5</code>, <code>larkquill-chorus-0.7</code>. Older <code>wrenby-*</code> IDs and the old base URL still work.</p>
   <div class="tabs" id="tabs"><button data-t="curl" class="on">curl</button><button data-t="python">Python</button><button data-t="js">JavaScript</button><button data-t="anythingllm">AnythingLLM</button></div>
   <pre id="code"></pre>
   <p class="sub" style="margin-top:12px">Limits per key: 20 requests a minute and 300 a day (Chorus counts as 3, max 30 a day). Errors use the OpenAI format: 401 bad key, 400 bad request, 429 rate or token limit.</p>
 </main>
 <script type="module">
 const LS = "wy.token";
-const BASE = /\.vercel\.app$|(^|\.)chopstickshq\.com$/.test(location.hostname) ? "" : "https://preset-ai-chat.vercel.app";
-const API_BASE = (BASE || location.origin) + "/v1";
+const BASE = /\.vercel\.app$|(^|\.)chopstickshq\.com$/.test(location.hostname) ? "" : "https://larkquillai.vercel.app";
+// Public API base (the API runs on Vercel; GitHub Pages is static). Old bases (preset-ai-chat.vercel.app/v1, wrenbyai.chopstickshq.com/v1) still work.
+const API_BASE = "https://larkquillai.vercel.app/v1";
 const $ = id => document.getElementById(id);
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); for (const k of kids) e.append(k); return e; };
 const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? Math.round(n / 1e3) + "k" : String(n);
@@ -108,10 +109,10 @@ function api(path, { method = "GET", body } = {}) {
 
 // ---------- docs ----------
 const SNIP = {
-  curl: `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer $WRENBY_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "wrenby-chirp-1",\n    "messages": [{"role": "user", "content": "Give me a fun fact about GPUs"}]\n  }'`,
-  python: `# pip install openai\nfrom openai import OpenAI\n\nclient = OpenAI(api_key="wby_...", base_url="${API_BASE}")\n\nr = client.chat.completions.create(\n    model="wrenby-chirp-1",\n    messages=[{"role": "user", "content": "Give me a fun fact about GPUs"}],\n)\nprint(r.choices[0].message.content)\n\n# streaming\nfor chunk in client.chat.completions.create(model="wrenby-trill-1", messages=[{"role": "user", "content": "Write a haiku"}], stream=True):\n    if chunk.choices and chunk.choices[0].delta.content:\n        print(chunk.choices[0].delta.content, end="")`,
-  js: `const r = await fetch("${API_BASE}/chat/completions", {\n  method: "POST",\n  headers: { "Authorization": "Bearer " + WRENBY_API_KEY, "Content-Type": "application/json" },\n  body: JSON.stringify({\n    model: "wrenby-chirp-1",\n    messages: [{ role: "user", content: "Give me a fun fact about GPUs" }],\n  }),\n});\nconst data = await r.json();\nconsole.log(data.choices[0].message.content);`,
-  anythingllm: `AnythingLLM → Settings → AI Providers → LLM → "Generic OpenAI"\n\nBase URL              ${API_BASE}\nAPI Key               wby_... (your key)\nChat Model Name       wrenby-chirp-1\nToken context window  16000\nMax Tokens            4096\n\nAny app with an "OpenAI-compatible" or "Generic OpenAI" option takes the same three things:\nthe Base URL, your key, and a model (wrenby-chirp-1, wrenby-trill-1, wrenby-aria-1.5 or wrenby-chorus-0.7).`,
+  curl: `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer $LARKQUILL_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "larkquill-chirp-1",\n    "messages": [{"role": "user", "content": "Give me a fun fact about GPUs"}]\n  }'`,
+  python: `# pip install openai\nfrom openai import OpenAI\n\nclient = OpenAI(api_key="wby_...", base_url="${API_BASE}")\n\nr = client.chat.completions.create(\n    model="larkquill-chirp-1",\n    messages=[{"role": "user", "content": "Give me a fun fact about GPUs"}],\n)\nprint(r.choices[0].message.content)\n\n# streaming\nfor chunk in client.chat.completions.create(model="wrenby-trill-1", messages=[{"role": "user", "content": "Write a haiku"}], stream=True):\n    if chunk.choices and chunk.choices[0].delta.content:\n        print(chunk.choices[0].delta.content, end="")`,
+  js: `const r = await fetch("${API_BASE}/chat/completions", {\n  method: "POST",\n  headers: { "Authorization": "Bearer " + LARKQUILL_API_KEY, "Content-Type": "application/json" },\n  body: JSON.stringify({\n    model: "larkquill-chirp-1",\n    messages: [{ role: "user", content: "Give me a fun fact about GPUs" }],\n  }),\n});\nconst data = await r.json();\nconsole.log(data.choices[0].message.content);`,
+  anythingllm: `AnythingLLM → Settings → AI Providers → LLM → "Generic OpenAI"\n\nBase URL              ${API_BASE}\nAPI Key               wby_... (your key)\nChat Model Name       larkquill-chirp-1\nToken context window  16000\nMax Tokens            4096\n\nAny app with an "OpenAI-compatible" or "Generic OpenAI" option takes the same three things:\nthe Base URL, your key, and a model (larkquill-chirp-1, wrenby-trill-1, wrenby-aria-1.5 or wrenby-chorus-0.7).`,
 };
 $("baseUrl").textContent = API_BASE;
 $("cBase").textContent = API_BASE; $("cChat").textContent = API_BASE + "/chat/completions"; $("cModels").textContent = API_BASE + "/models";
@@ -185,14 +186,14 @@ $("createForm").onsubmit = async e => { e.preventDefault(); $("createErr").hidde
 // Copy-once reveal: the full key lives only in this closure until Done; it's masked unless revealed, and never re-fetchable.
 let NEWKEY = "", shown = false;
 const mask = k => k.slice(0, 8) + "•".repeat(20) + k.slice(-4);
-const curlFor = k => `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer ${k}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "wrenby-chirp-1", "messages": [{"role": "user", "content": "Say hello"}]}'`;
+const curlFor = k => `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer ${k}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "larkquill-chirp-1", "messages": [{"role": "user", "content": "Say hello"}]}'`;
 function showNewKey(k) { NEWKEY = k; shown = false; $("newKeyVal").textContent = mask(k); $("revealBtn").textContent = "Reveal"; $("copyBtn").textContent = "Copy key";
   $("newCurl").textContent = curlFor(mask(k)); $("newKey").hidden = false; }
 $("revealBtn").onclick = () => { if (!NEWKEY) return; shown = !shown; $("newKeyVal").textContent = shown ? NEWKEY : mask(NEWKEY); $("newCurl").textContent = curlFor(shown ? NEWKEY : mask(NEWKEY)); $("revealBtn").textContent = shown ? "Hide" : "Reveal"; };
 $("copyBtn").onclick = async () => { if (!NEWKEY) return; try { await navigator.clipboard.writeText(NEWKEY); $("copyBtn").textContent = "Copied"; $("keyWarn").textContent = "Copied. Store it now: once you press Done it's gone from this page for good."; } catch { $("copyBtn").textContent = "Copy failed"; } };
 $("copyCurl").onclick = async () => { if (!NEWKEY) return; try { await navigator.clipboard.writeText(curlFor(NEWKEY)); $("copyCurl").textContent = "Copied"; setTimeout(() => $("copyCurl").textContent = "Copy", 1500); } catch {} };
 $("doneBtn").onclick = () => { NEWKEY = ""; shown = false; $("newKeyVal").textContent = ""; $("newCurl").textContent = ""; $("newKey").hidden = true; };
-$("curlQuick").textContent = `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer $WRENBY_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "wrenby-chirp-1", "messages": [{"role": "user", "content": "Say hello"}]}'`;
+$("curlQuick").textContent = `curl ${API_BASE}/chat/completions \\\n  -H "Authorization: Bearer $LARKQUILL_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "larkquill-chirp-1", "messages": [{"role": "user", "content": "Say hello"}]}'`;
 $("copyQuick").onclick = async () => { try { await navigator.clipboard.writeText($("curlQuick").textContent); $("copyQuick").textContent = "Copied"; setTimeout(() => $("copyQuick").textContent = "Copy", 1500); } catch {} };
 load();
 </script></body></html>

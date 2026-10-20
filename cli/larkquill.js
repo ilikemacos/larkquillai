@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// WrenbyAI CLI: interactive terminal agent. No dependencies (Node 18+).
+// LarkquillAI CLI: interactive terminal agent. No dependencies (Node 18+).
 import fs from "node:fs/promises"; import path from "node:path"; import { spawn } from "node:child_process"; import readline from "node:readline";
-const API = process.env.WRENBY_API || "https://preset-ai-chat.vercel.app/api/chat";
+const API = process.env.LARKQUILL_API || process.env.WRENBY_API || "https://larkquillai.vercel.app/api/chat";
 const argv = process.argv.slice(2); const YES = argv.includes("-y") || argv.includes("--yes"); const once = argv.filter(a => !a.startsWith("-")).join(" ");
 const TIER_IN = (argv.find(a => a.startsWith("--tier=")) || "--tier=turbo").slice(7).toLowerCase(); const TIER = ({ chirp: "spark", trill: "turbo", aria: "forge", chorus: "zenith" })[TIER_IN.replace(/[-\s]?[\d.]+$/, "")] || TIER_IN; const MAXT = { spark: 6144, turbo: 24576, forge: 49152, zenith: 73728 }[TIER] || 24576;
-if (argv.includes("-h") || argv.includes("--help")) { console.log(`wrenby — WrenbyAI coding agent for your terminal
+if (argv.includes("-h") || argv.includes("--help")) { console.log(`larkquill — LarkquillAI coding agent for your terminal
 
-  wrenby                 interactive session in the current folder
-  wrenby "prompt"        run one task and exit
+  larkquill              interactive session in the current folder
+  larkquill "prompt"     run one task and exit
   -y, --yes              approve every file write and command without asking
   --tier=chirp|trill|aria|chorus   model: Chirp 1, Trill 1 (default), Aria 1.5, Chorus 0.7
 
@@ -51,8 +51,8 @@ async function stream(messages, step) {
       for (const t of j.tool_calls || []) { const k = t.index ?? tc.length; tc[k] ||= { id: "", type: "function", function: { name: "", arguments: "" } }; if (t.id) tc[k].id = t.id; if (t.function?.name) tc[k].function.name += t.function.name; if (t.function?.arguments) tc[k].function.arguments += t.function.arguments; } } } }
   finally { if (spin) clearInterval(spin); if (tty && !started) process.stdout.write("\r\x1b[K"); }
   if (started) process.stdout.write("\n"); tc.forEach((x, i) => { if (x && !x.id) x.id = "call_" + i; }); return { content, tool_calls: tc.filter(x => x?.function?.name) }; }
-const system = () => `You are WrenbyAI, a coding agent running in the user's terminal, in the folder ${ROOT} (${process.platform}). Help them build, fix and understand code.
-Use list_files / read_file to look before changing things. Use write_file with COMPLETE file contents (never placeholders) and run_command to run, test or install. Each write and command needs the user's OK; if they decline, adapt. Keep replies short plain text (light markdown is fine). Never name or hint at the underlying model or provider; if asked, you are WrenbyAI.`;
+const system = () => `You are LarkquillAI, a coding agent running in the user's terminal, in the folder ${ROOT} (${process.platform}). Help them build, fix and understand code.
+Use list_files / read_file to look before changing things. Use write_file with COMPLETE file contents (never placeholders) and run_command to run, test or install. Each write and command needs the user's OK; if they decline, adapt. Keep replies short plain text (light markdown is fine). Never name or hint at the underlying model or provider; if asked, you are LarkquillAI.`;
 let history = [];
 async function turn(text) { history.push({ role: "user", content: text }); const msgs = [{ role: "system", content: system() }, ...history];
   for (let step = 0; step < 20; step++) { const r = await stream(msgs, step); const a = { role: "assistant", content: r.content || null }; if (r.tool_calls.length) a.tool_calls = r.tool_calls; msgs.push(a);
@@ -60,11 +60,11 @@ async function turn(text) { history.push({ role: "user", content: text }); const
     for (const t of r.tool_calls) { let args = {}; try { args = JSON.parse(t.function.arguments || "{}"); } catch {} const res = await runTool(t.function.name, args); msgs.push({ role: "tool", tool_call_id: t.id, content: JSON.stringify(res).slice(0, 20000) }); } }
   history = msgs.slice(1).slice(-60); while (history[0]?.role === "tool") history.shift(); }
 async function main() {
-  if (once) { try { await turn(once); } catch (e) { console.error(red("wrenby: " + e.message)); process.exitCode = 1; } rl.close(); return; }
-  console.log(acc("WrenbyAI") + dim(` · ${ROOT} · /help · /exit`));
+  if (once) { try { await turn(once); } catch (e) { console.error(red("larkquill: " + e.message)); process.exitCode = 1; } rl.close(); return; }
+  console.log(acc("LarkquillAI") + dim(` · ${ROOT} · /help · /exit`));
   for (;;) { const l = await ask("\n" + acc("› ")); if (l == null) break; const t = l.trim(); if (!t) continue;
     if (t === "/exit" || t === "/quit") break; if (t === "/clear") { history = []; console.log(dim("conversation cleared")); continue; }
-    if (t === "/help") { console.log("Describe what you want. WrenbyAI can read files here, write files and run commands (it asks first).\n/clear forget the conversation · /exit quit"); continue; }
+    if (t === "/help") { console.log("Describe what you want. LarkquillAI can read files here, write files and run commands (it asks first).\n/clear forget the conversation · /exit quit"); continue; }
     try { await turn(t); } catch (e) { console.error(red("error: " + e.message)); } }
   rl.close(); }
 main();

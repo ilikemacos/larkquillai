@@ -1,4 +1,4 @@
-// WrenbyAI auth + chat-history UI. Self-contained ES module.
+// LarkquillAI auth + chat-history UI. Self-contained ES module.
 // Enables itself only when /api/auth/me reports { configured:true } (the DB flag).
 // Stores a bearer token in localStorage (for GitHub Pages and Tauri where the
 // session cookie is cross-site) and also sends credentials for same-origin cookies.
@@ -340,7 +340,7 @@ async function mountGoogle(dlg, err) {
 // ---- sign-in dialog ----
 function openSignin() {
   const dlg = document.createElement("dialog"); dlg.className = "wy-dialog";
-  dlg.innerHTML = `<div class="wy-dh">Sign in to WrenbyAI</div><div class="wy-db">
+  dlg.innerHTML = `<div class="wy-dh">Sign in to LarkquillAI</div><div class="wy-db">
     <div class="wy-methods" role="tablist"><button type="button" data-m="password">Password</button><button type="button" data-m="email" class="on">Email code</button><button type="button" data-m="passkey">${bioName() === "passkey" ? "Passkey" : bioName()}</button></div>
     <div class="wy-google" hidden><div class="wy-gbtn"></div><div class="wy-or">or</div></div>
     <div class="wy-hint">We'll email you a 6-digit code. No password needed.</div>

@@ -1,12 +1,12 @@
 // VS Code-style bottom panel: explorer + xterm shell over the virtual filesystem.
 import { vfs, resolve, downloadText, zipFiles, runAgent, IDENTITY } from "./core.js";
 import { authInfo } from "./auth.js";
-const PY_BASE = "https://preset-ai-chat.vercel.app/pyodide/";
+const PY_BASE = "https://larkquillai.vercel.app/pyodide/";
 let term, fit, cwd = "/", line = "", cur = 0, hist = [], hi = 0, busy = null, opened = false, ui = {};
 const C = { dim: s => `\x1b[2m${s}\x1b[0m`, acc: s => `\x1b[38;2;255;106;43m${s}\x1b[0m`, err: s => `\x1b[38;2;224;106;90m${s}\x1b[0m`, dir: s => `\x1b[38;2;130;170;255m${s}\x1b[0m` };
 const out = s => term.write(String(s).replace(/\r?\n/g, "\r\n"));
 const outln = s => out(s + "\n");
-const tag = () => sbx ? C.acc("wrenby") + C.dim("@cloud") + " " + C.dir(sbx.cwd) : C.acc("wrenby") + " " + C.dir(cwd);
+const tag = () => sbx ? C.acc("larkquill") + C.dim("@cloud") + " " + C.dir(sbx.cwd) : C.acc("larkquill") + " " + C.dir(cwd);
 const prompt = () => { term.write("\r\n" + tag() + " $ "); line = ""; cur = 0; };
 function args(s) { const a = []; let m; const re = /"((?:\\.|[^"\\])*)"|'([^']*)'|(\S+)/g; while ((m = re.exec(s))) a.push(m[1] != null ? m[1].replace(/\\(.)/g, "$1") : m[2] != null ? m[2] : m[3]); return a; }
 const HELP = `Commands
@@ -15,7 +15,7 @@ const HELP = `Commands
   clear  help  download <file>  zip [dir]  upload
   node <file.js>      run JavaScript in a sandboxed worker
   python <file.py>    run Python in the browser (loads on first use)
-  wrenby "<prompt>"   ask WrenbyAI; files it creates land in this folder
+  larkquill "<prompt>" ask LarkquillAI (wrenby also works); files it creates land in this folder
   cloud / local       switch between the real cloud sandbox (signed in) and browser files
 Keys: Up/Down history, Tab completes, Ctrl+C cancels, Ctrl+L clears.`;
 // ---------- cloud sandbox (signed-in users) ----------
@@ -38,8 +38,8 @@ async function exec(raw) {
     if (c0 === "local") { sbx = null; wantCloud = false; return outln(C.dim("using the browser workspace (type cloud for the real sandbox)")); }
     if (c0 === "cloud") { wantCloud = true; await cloudStart(false); return; }
     if (c0 === "clear") return term.clear();
-    if (!sbx && wantCloud && authInfo().user && !["help", "wrenby", "download", "zip", "upload"].includes(c0)) await cloudStart(false);
-    if (sbx && !["help", "wrenby", "download", "zip", "upload"].includes(c0)) return cloudExec(raw); }
+    if (!sbx && wantCloud && authInfo().user && !["help", "larkquill", "wrenby", "download", "zip", "upload"].includes(c0)) await cloudStart(false);
+    if (sbx && !["help", "larkquill", "wrenby", "download", "zip", "upload"].includes(c0)) return cloudExec(raw); }
   let redir = null; const rm = raw.match(/^(echo\b.*?)\s(>>?)\s*(\S+)\s*$/); if (rm) { raw = rm[1]; redir = { app: rm[2] === ">>", file: rm[3] }; }
   const [cmd, ...a] = args(raw); if (!cmd) return; const P = p => resolve(cwd, p);
   switch (cmd) {
@@ -59,7 +59,7 @@ async function exec(raw) {
     case "upload": return ui.upload?.();
     case "node": return runNode(P(a[0] || ""), a.slice(1));
     case "python": case "python3": return runPy(P(a[0] || ""));
-    case "wrenby": return ask(a.join(" "));
+    case "larkquill": case "wrenby": return ask(a.join(" "));
     default: throw new Error(cmd + ": command not found (try help)");
   } }
 function zipDir(p) { const fs = vfs.under(p); if (!fs.length) throw new Error("zip: nothing to zip in " + p); const base = p === "/" ? "/" : p + "/";
@@ -80,15 +80,15 @@ let py; async function runPy(p) { const code = vfs.read(p);
   for (const f of vfs.files.keys()) { const d = root + f.slice(0, f.lastIndexOf("/")); try { pyo.FS.mkdirTree(d); } catch {} pyo.FS.writeFile(root + f, vfs.files.get(f)); }
   pyo.FS.chdir(root + cwd);
   try { await pyo.loadPackagesFromImports(code).catch(() => {}); await pyo.runPythonAsync(code); } catch (e) { outln(C.err(String(e.message || e).trim().split("\n").slice(-6).join("\n"))); } }
-async function ask(q) { if (!q) throw new Error('usage: wrenby "<prompt>"'); const ac = new AbortController(); busy = { cancel: () => ac.abort() };
+async function ask(q) { if (!q) throw new Error('usage: larkquill "<prompt>"'); const ac = new AbortController(); busy = { cancel: () => ac.abort() };
   const tree = [...vfs.files.keys()].slice(0, 200).join("\n") || "(empty)";
-  const sys = `You are WrenbyAI, a coding assistant answering inside a terminal. Plain text, short. When the user wants code or files, call create_file with the COMPLETE content (paths relative to the current folder ${cwd}). ${IDENTITY}\nFiles in the workspace:\n${tree}`;
+  const sys = `You are LarkquillAI, a coding assistant answering inside a terminal. Plain text, short. When the user wants code or files, call create_file with the COMPLETE content (paths relative to the current folder ${cwd}). ${IDENTITY}\nFiles in the workspace:\n${tree}`;
   let thinking = true; out(C.dim("thinking…"));
   try { const r = await runAgent([{ role: "system", content: sys }, { role: "user", content: q }], { signal: ac.signal, noSearch: false, maxTokens: 8192,
       on: { content: (_, d) => { if (thinking) { thinking = false; out("\r\x1b[K"); } out(d); }, search: j => out(C.dim(` (searched the web · ${j.count})`)), file: p => { if (thinking) { thinking = false; out("\r\x1b[K"); } outln("\n" + C.acc("✓ wrote ") + p); } },
       onFile: (name, content) => vfs.write(resolve(cwd, name), content) });
     if (thinking) out("\r\x1b[K"); if (!r.text && !r.files.length) outln(C.dim("(no reply)"));
-  } catch (e) { out("\r\x1b[K"); outln(e.name === "AbortError" ? C.dim("cancelled") : C.err("wrenby: " + e.message)); } }
+  } catch (e) { out("\r\x1b[K"); outln(e.name === "AbortError" ? C.dim("cancelled") : C.err("larkquill: " + e.message)); } }
 function complete() { const parts = line.slice(0, cur).split(" "); const w = parts.pop(); const slash = w.lastIndexOf("/"); const dir = resolve(cwd, slash >= 0 ? w.slice(0, slash + 1) || "/" : "."), pre = w.slice(slash + 1);
   let l; try { l = vfs.list(dir); } catch { return; } const m = l.filter(([n]) => n.startsWith(pre)); if (m.length !== 1) { if (m.length > 1) { out("\r\n" + m.map(x => x[0]).join("  ")); const keep = line, c = cur; prompt(); line = keep; cur = c; term.write(line); } return; }
   const add = m[0][0].slice(pre.length) + (m[0][1] === "d" ? "/" : " "); line = line.slice(0, cur) + add + line.slice(cur); cur += add.length; term.write(add); }
@@ -106,13 +106,13 @@ async function onData(d) {
 function renderTree() { const el = ui.tree; if (!el) return; el.innerHTML = ""; const walk = (dir, depth) => { for (const [n, t] of vfs.list(dir)) { const p = (dir === "/" ? "" : dir) + "/" + n; const r = document.createElement("div"); r.className = "xrow" + (t === "d" ? " xdir" : ""); r.style.paddingLeft = 8 + depth * 12 + "px"; r.textContent = (t === "d" ? "▸ " : "") + n; r.title = p;
       r.onclick = () => t === "d" ? (cwd = p, busy || redraw()) : ui.openFile?.(p); if (t === "f") { const dl = document.createElement("button"); dl.className = "xdl"; dl.textContent = "↓"; dl.title = "Download"; dl.onclick = e => { e.stopPropagation(); downloadText(p, vfs.read(p)); }; r.appendChild(dl); }
       el.appendChild(r); if (t === "d") walk(p, depth + 1); } };
-  walk("/", 0); if (!el.children.length) el.innerHTML = '<div class="xempty">No files yet. Ask WrenbyAI to make one, or use upload.</div>'; }
+  walk("/", 0); if (!el.children.length) el.innerHTML = '<div class="xempty">No files yet. Ask LarkquillAI to make one, or use upload.</div>'; }
 export function initTerminal(opts) { ui = opts; vfs.listeners.add(renderTree); renderTree(); }
 export function toggleTerminal(force) { const panel = ui.panel, show = force ?? panel.hidden; panel.hidden = !show; document.body.classList.toggle("term-open", show);
   if (show && !opened) { opened = true; term = new window.Terminal({ fontFamily: '"JetBrains Mono", ui-monospace, Menlo, monospace', fontSize: 13, cursorBlink: true, convertEol: false,
       theme: { background: "#0c0c0c", foreground: "#ececec", cursor: "#ff6a2b", selectionBackground: "#3a3a3a", black: "#111111", blue: "#82aaff", brightBlack: "#6a6a6a" } });
     fit = new window.FitAddon.FitAddon(); term.loadAddon(fit); term.open(ui.host); term.onData(onData); new ResizeObserver(() => { try { fit.fit(); } catch {} }).observe(ui.host);
-    outln(C.acc("WrenbyAI terminal") + C.dim("  ·  type help  ·  files are saved in this browser"));
+    outln(C.acc("LarkquillAI terminal") + C.dim("  ·  type help  ·  files are saved in this browser"));
     if (authInfo().user) { busy = { cancel() {} }; cloudStart(false).finally(() => { busy = null; prompt(); }); } else prompt(); }
   if (show) setTimeout(() => { try { fit.fit(); } catch {} term.focus(); }, 30); return show; }
 export const termRun = async cmd => { toggleTerminal(true); for (const ch of cmd) await onData(ch); await onData("\r"); };

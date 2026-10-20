@@ -10,7 +10,7 @@ import { onAuthChange } from "./auth.js";
 let session = null;
 const $ = s => document.querySelector(s), log = $("#log"), q = $("#q"), send = $("#send"), status = $("#status");
 marked.setOptions({ gfm: true, breaks: true });
-const SYS = `You are WrenbyAI, a friendly, coding-first AI assistant. Help with code, questions and anything else. Use markdown and keep prose short. Use web search for anything current and cite sources as [title](url); don't invent URLs.
+const SYS = `You are LarkquillAI, a friendly, coding-first AI assistant. Help with code, questions and anything else. Use markdown and keep prose short. Use web search for anything current and cite sources as [title](url); don't invent URLs.
 Files: when the user asks you to make a file, script, page or project, call the create_file tool once per file with the COMPLETE content (no placeholders). The user gets a download card for each file and the files also appear in their terminal workspace. Don't repeat the file contents in your reply; just say briefly what you made. Short examples can go in fenced code blocks; put the filename after the language when it is a file, like \`\`\`js app.js. ${IDENTITY}`;
 let history = [], busy = false, ctrl = null, tier = localStorage.getItem("wy.model") || localStorage.getItem("wrenby-tier") || "spark", kit = null;
 const tsel = $("#tier"); tsel.value = tier; const hint = () => $("#tierhint").textContent = tier === "zenith" ? "uses the most usage" : "";
@@ -24,9 +24,9 @@ function enhance(el) { el.querySelectorAll("pre").forEach(pre => { const code = 
   el.querySelectorAll("a").forEach(a => { a.target = "_blank"; a.rel = "noopener"; }); enhanceCode(el); }
 const md = (el, t, fin) => { el.classList.add("md"); el.innerHTML = DOMPurify.sanitize(marked.parse(t || "")); if (fin) enhance(el); log.scrollTop = 1e9; };
 function add(who, text) { const d = document.createElement("div"); d.className = "msg " + who;
-  d.innerHTML = `<div class="av">${who === "u" ? "You" : '<img src="favicon.svg" alt="WrenbyAI" style="width:24px;height:24px;border-radius:5px">'}</div><div class="bub"></div>`;
+  d.innerHTML = `<div class="av">${who === "u" ? "You" : '<img src="favicon.svg" alt="LarkquillAI" style="width:24px;height:24px;border-radius:5px">'}</div><div class="bub"></div>`;
   log.appendChild(d); const b = d.querySelector(".bub"); if (text != null) { if (who === "u") b.textContent = text; else md(b, text, true); } log.scrollTop = 1e9; return b; }
-const hello = () => add("a", "Hi, I'm WrenbyAI. Ask me anything, or tell me what we're building.").closest(".msg").classList.add("wy-noacts");
+const hello = () => add("a", "Hi, I'm LarkquillAI. Ask me anything, or tell me what we're building.").closest(".msg").classList.add("wy-noacts");
 // ---------- side viewer ----------
 const viewer = $("#viewer"); let vfile = null;
 function openViewer(f) { vfile = f; $("#vicon").textContent = langOf(f.name); $("#vname").textContent = f.name.replace(/^\//, ""); $("#vsize").textContent = fmtSize(new Blob([f.content]).size);
@@ -90,7 +90,7 @@ async function ask(text, images = [], { showUser = true } = {}) {
   } catch (e) { endThink(); if (e.name === "AbortError") { md(out, (content ? content + "\n\n" : "") + "_Stopped._", true); if (content) history.push({ role: "assistant", content }); }
     else { history.pop(); const w = document.createElement("div"); w.className = "warn";
       const friendly = e.code && ["no_answer", "quota_limit", "signin_required", "model_unavailable", "quota_error", "bad_image", "too_large", "no_vision", "token_limit"].includes(e.code);
-      w.textContent = friendly ? e.message : "Couldn't reach WrenbyAI: " + e.message; out.appendChild(w); if (e.code === "quota_limit") kit?.setQuota(tier, 0);
+      w.textContent = friendly ? e.message : "Couldn't reach LarkquillAI: " + e.message; out.appendChild(w); if (e.code === "quota_limit") kit?.setQuota(tier, 0);
       if (!["quota_limit", "signin_required", "bad_image", "too_large", "token_limit"].includes(e.code)) kit?.retryButton(out, "Retry", () => regenerate()); } }
   busy = false; dispatchEvent(new Event("wrenby:gen-end")); ctrl = null; kit?.setBusy(false); status.textContent = "Ready"; q.focus(); }
 const userMsgs = () => [...log.querySelectorAll(".msg.u")];
@@ -112,7 +112,7 @@ function loadConversation(msgs) { freshChat(); for (const m of msgs || []) { con
     if (m.role === "user") { const ub = add("u", c); ub.closest(".msg")._raw = c; history.push({ role: "user", content: c }); }
     else if (m.role === "assistant") { const b = add("a", c); if (Array.isArray(m.files) && m.files.length) showFiles(b, m.files.filter(f => f && f.name && typeof f.content === "string")); history.push({ role: "assistant", content: c }); } }
   if (!log.children.length) hello(); }
-initAuth({ base: "https://preset-ai-chat.vercel.app", getMode: () => tier, onNewChat: () => { freshChat(); hello(); }, onLoadChat: msgs => loadConversation(msgs) }).then(s => session = s).catch(e => console.warn("auth init failed", e));
+initAuth({ base: "https://larkquillai.vercel.app", getMode: () => tier, onNewChat: () => { freshChat(); hello(); }, onLoadChat: msgs => loadConversation(msgs) }).then(s => session = s).catch(e => console.warn("auth init failed", e));
 // ---------- terminal panel ----------
 const ufile = $("#ufile");
 ufile.onchange = async () => { for (const f of ufile.files) vfs.write("/" + f.name, await f.text()); ufile.value = ""; };
@@ -122,6 +122,6 @@ $("#zipws").onclick = () => { const fs = [...vfs.files.keys()]; if (fs.length) z
 addEventListener("keydown", e => { if (e.ctrlKey && (e.key === "`" || e.code === "Backquote")) { e.preventDefault(); if (!toggleTerminal()) q.focus(); }
   else if (e.key === "Escape" && !viewer.hidden) { e.preventDefault(); closeViewer(); } });
 applyTheme(); vfs.load(); hello(); q.focus();
-try { kit = initChatKit({ form: $("#f"), input: q, send, tierSelect: tsel, log, dropZone: document.querySelector("main"), apiBase: "https://preset-ai-chat.vercel.app",
+try { kit = initChatKit({ form: $("#f"), input: q, send, tierSelect: tsel, log, dropZone: document.querySelector("main"), apiBase: "https://larkquillai.vercel.app",
     onRegenerate: () => regenerate(), onEdit: (m, t) => editResend(m, t) });
   onAuthChange(u => kit.setUser(u && (u.id || u.email))); } catch (e) { console.warn("chat kit", e); }

@@ -16,11 +16,11 @@ export function openSettings() {
   if (!document.getElementById("wy-sl-css")) { const s = el("style"); s.id = "wy-sl-css"; s.textContent = CSS; document.head.append(s); }
   const dlg = el("dialog", "wy-sl"), b = el("div", "b"), x = el("button", "x", "✕"); x.onclick = () => dlg.close(); dlg.style.position = "relative";
   const p = staticPrefs();
-  b.append(el("h2", "", "General"), el("p", "sub", "How WrenbyAI looks."),
+  b.append(el("h2", "", "General"), el("p", "sub", "How LarkquillAI looks."),
     (() => { const seg = el("div", "seg"); for (const [c, n] of Object.entries(COMPANIONS)) { const x = el("button", getCompanion() === c ? "on" : "", n); x.type = "button"; x.onclick = () => { setCompanion(c); seg.querySelectorAll("button").forEach(y => y.classList.toggle("on", y === x)); }; seg.append(x); }
-      return row("Companion", "Who keeps you company while WrenbyAI works: Wrenby, or Milyy and her ball. Saved to your account.", seg); })(),
+      return row("Companion", "Who keeps you company while LarkquillAI works: Larkquill, or Milyy and her ball. Saved to your account.", seg); })(),
     (() => { const ak = el("button", "", "API keys"); ak.type = "button"; ak.className = "pri"; ak.onclick = () => window.open(new URL("api.html", location.href).href, "_blank", "noopener");
-      return row("API keys", "Create and manage keys for the WrenbyAI developer API, and read the docs.", ak); })(),
+      return row("API keys", "Create and manage keys for the LarkquillAI developer API, and read the docs.", ak); })(),
     ...(SKY ? [] : [row("Pixel background", "The moving pixel static at the edges. Off keeps a plain background; clicking the background still inverts.", sw(p.on !== false, v => setStaticPrefs({ on: v }))),
     row("Inverted theme", "White background, black squares. You can also click the empty background.", sw(isInverted(), v => setInverted(v))),
     row("Shimmer", "Squares flicker slowly. Off keeps the static still.", sw(p.shimmer, v => setStaticPrefs({ shimmer: v }))),

@@ -1,4 +1,4 @@
-/* WrenbyAI "liquid glass" theme. Loaded last (theme.js keeps it at the end of <head>), so it layers over
+/* LarkquillAI "liquid glass" theme. Loaded last (theme.js keeps it at the end of <head>), so it layers over
    index.html, theme.js, auth.js, settings.js and cloudtask.js styles without touching their markup or JS.
    Recipe: a slow colour aurora behind everything, translucent panels with backdrop blur + saturation,
    a bright top rim and a soft inner glow, and pill-shaped controls. */

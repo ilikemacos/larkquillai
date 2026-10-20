@@ -1,4 +1,4 @@
-// WrenbyAI "digital static" theme: white 7px squares on an 8px grid, pushed in from both edges.
+// LarkquillAI "digital static" theme: white 7px squares on an 8px grid, pushed in from both edges.
 // One canvas, requestAnimationFrame, paused when hidden. Click the background to invert.
 // Configure via window.WRENBY_STATIC = { cell: 8, gap: 1, shimmer: 0.01, period: 15000, min: 0.05, max: 0.40 } before load.
 const CFG = Object.assign({ cell: 8, gap: 1, shimmer: 0.01, period: 15000, min: 0.05, max: 0.40, curve: 1.6 }, window.WRENBY_STATIC || {});

@@ -1,4 +1,4 @@
-// WrenbyAI minimal dark theme: near-black, centered rounded composer pill with the mode picker inside,
+// LarkquillAI minimal dark theme: near-black, centered rounded composer pill with the mode picker inside,
 // right-aligned grey user bubbles, plain assistant text, slim collapsible chat sidebar. Loaded after the page builds.
 import { modeToggle, injectCSS } from "./cloudtask.js";
 import { startSky } from "./sky.js";
@@ -27,4 +27,4 @@ button{border-radius:10px}a{color:#cfcfcf}
 export function applyTheme() { startSky(); injectCSS(); if (!document.getElementById("wtheme")) { const s = document.createElement("style"); s.id = "wtheme"; s.textContent = CSS; document.head.appendChild(s); }
   const f = document.getElementById("f"), q = document.getElementById("q"), tier = document.getElementById("tier");
   if (f && q) { if (tier && tier.parentElement !== f) f.insertBefore(tier, q.nextSibling); if (!f.querySelector(".ctmode")) f.insertBefore(modeToggle(), (tier && tier.parentElement === f ? tier : q).nextSibling); }
-  document.title = document.title.replace(/·.*$/, "").trim() || "WrenbyAI"; }
+  document.title = document.title.replace(/·.*$/, "").trim() || "LarkquillAI"; }

@@ -1,4 +1,4 @@
-// WrenbyAI chat kit: shared composer + message UI for the Vercel app and the GitHub Pages copy.
+// LarkquillAI chat kit: shared composer + message UI for the Vercel app and the GitHub Pages copy.
 //  - image attachments (button, paste, drag and drop) with client-side downscale (max side 1568px) + WebP/JPEG compression
 //  - model pill (Chirp/Trill/Aria/Chorus), persisted per user
 //  - Stop button while streaming, Retry buttons, message actions (copy / regenerate / edit and resend)

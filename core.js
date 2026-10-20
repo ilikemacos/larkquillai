@@ -1,6 +1,6 @@
 // Shared: virtual filesystem (IndexedDB), streaming API client, agent loop with create_file.
-export const API = "https://preset-ai-chat.vercel.app/api/chat";
-export const IDENTITY = "Never name or hint at the underlying model or provider; if asked, you are WrenbyAI.";
+export const API = "https://larkquillai.vercel.app/api/chat";
+export const IDENTITY = "Never name or hint at the underlying model or provider; if asked, you are LarkquillAI.";
 // ---------- VFS ----------
 const DB = "wrenby-vfs", ST = "kv";
 const idb = () => new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -35,7 +35,7 @@ export const vfs = {
 // ---------- downloads ----------
 export function downloadBlob(name, blob) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
 export const downloadText = (name, text) => downloadBlob(name.split("/").pop(), new Blob([text], { type: "text/plain" }));
-export function zipFiles(list, name = "wrenbyai-files.zip") { const enc = new TextEncoder(), o = {}; for (const f of list) o[f.name.replace(/^\/+/, "")] = enc.encode(f.content);
+export function zipFiles(list, name = "larkquillai-files.zip") { const enc = new TextEncoder(), o = {}; for (const f of list) o[f.name.replace(/^\/+/, "")] = enc.encode(f.content);
   downloadBlob(name, new Blob([window.fflate.zipSync(o)], { type: "application/zip" })); }
 // ---------- API ----------
 export const CREATE_FILE = { type: "function", function: { name: "create_file", description: "Create or overwrite a file for the user to download. Always pass the COMPLETE file content.", parameters: { type: "object", properties: { filename: { type: "string", description: "relative path, e.g. app.js or src/main.py" }, content: { type: "string" } }, required: ["filename", "content"] } } };
@@ -58,12 +58,12 @@ export async function streamOnce(body, on = {}, signal) {
         if (t.id) tc[k].id = t.id; if (t.function?.name) tc[k].function.name += t.function.name; if (t.function?.arguments) tc[k].function.arguments += t.function.arguments; } } }
   tc.forEach((c, i) => { if (c && !c.id) c.id = "call_" + i; });
   // never return silently empty: surface the server's no-answer event, or a stream that just ended empty
-  if (!content.trim() && !tc.some(c => c?.function?.name)) { const e = new Error(err?.error || "WrenbyAI didn't send an answer this time. Please try again."); e.code = "no_answer"; e.reason = err?.reason || "empty"; throw e; }
+  if (!content.trim() && !tc.some(c => c?.function?.name)) { const e = new Error(err?.error || "LarkquillAI didn't send an answer this time. Please try again."); e.code = "no_answer"; e.reason = err?.reason || "empty"; throw e; }
   return { content, reasoning, tool_calls: tc.filter(c => c?.function?.name) }; }
 // Agent loop: runs create_file calls via onFile(name, content) -> path. Returns final text + files.
 export async function runAgent(messages, { tier = "spark", maxTokens = 6144, on = {}, onFile, signal, noSearch } = {}) {
   const msgs = [...messages], files = []; let text = "";
-  // GLM 5.3 Flash / Wrenby Code and image messages: one request per message (each counts against a daily quota), no tools
+  // GLM 5.3 Flash / Larkquill Code and image messages: one request per message (each counts against a daily quota), no tools
   const single = tier === "flash" || tier === "code" || msgs.some(m => Array.isArray(m.content));
   for (let step = 0; step < (single ? 1 : 6); step++) {
     const req = () => streamOnce({ messages: msgs, tools: single ? undefined : [CREATE_FILE], max_tokens: maxTokens, tier, no_search: noSearch || step > 0 }, { ...on, content: (c, d) => on.content?.(text + c, d) }, signal);
