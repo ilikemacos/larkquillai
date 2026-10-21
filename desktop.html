@@ -3,5 +3,6 @@
 <body><main><a href="./">← Back to chat</a><h1 style="margin-top:20px">LarkquillAI for desktop</h1><p>Windows and macOS. The app updates itself automatically when a new version is out.</p>
 <h2>macOS (Terminal)</h2><div class="cmd"><code>curl -fsSL https://ilikemacos.github.io/larkquillai/install.sh | sh</code><button>Copy</button></div>
 <h2>Windows (PowerShell)</h2><div class="cmd"><code>irm https://ilikemacos.github.io/larkquillai/install.ps1 | iex</code><button>Copy</button></div>
-<p style="margin-top:24px">Or download the installers from the <a href="https://github.com/ilikemacos/wyneai-desktop/releases/latest">latest release</a>.</p></main>
+<p style="margin-top:24px">Or download the installers from the <a href="https://github.com/ilikemacos/wyneai-desktop/releases/latest">latest release</a>.</p>
+<h2>Run fully offline</h2><p style="margin-top:0">Want LarkquillAI with no internet at all? <a href="local.html">Download LarkquillAI Local</a>: 4B and 8B models that run on your own computer.</p></main>
 <script>document.querySelectorAll(".cmd button").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.previousElementSibling.textContent);b.textContent="Copied"}catch{b.textContent="Failed"}setTimeout(()=>b.textContent="Copy",1200)})</script></body></html>
