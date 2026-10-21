@@ -20,18 +20,18 @@ Both are 4-bit (Q4_K_M) GGUF files. They run on the CPU, and faster on Apple Sil
 
 ```sh
 # 4B
-curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai-models/main/install/install.sh | sh -s -- 4b
+curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/main/install/install.sh | sh -s -- 4b
 # 8B
-curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai-models/main/install/install.sh | sh -s -- 8b
+curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/main/install/install.sh | sh -s -- 8b
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
 # 4B
-$env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai-models/main/install/install.ps1 | iex
+$env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/main/install/install.ps1 | iex
 # 8B
-$env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai-models/main/install/install.ps1 | iex
+$env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/main/install/install.ps1 | iex
 ```
 
 3. Chat:
@@ -45,7 +45,7 @@ The installer downloads the parts from GitHub Releases, checks every SHA256, joi
 
 ## Manual download
 
-Each model is split into parts under 1.9 GiB, because GitHub Releases allows at most 2 GiB per file. Download every part of one model from the [v1 release](https://github.com/ilikemacos/larkquillai-models/releases/tag/v1), then join them in order.
+Each model is split into parts under 1.9 GiB, because GitHub Releases allows at most 2 GiB per file. Download every part of one model from the [v1 release](https://github.com/ilikemacos/larkquillai/releases/tag/v1), then join them in order.
 
 | File | Parts |
 |---|---|
