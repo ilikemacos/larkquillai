@@ -1,0 +1,65 @@
+name: Publish model release
+
+# Builds the LarkquillAI Local release files on GitHub's own runner (downloads the
+# upstream GGUFs from Hugging Face, renames the metadata, splits, verifies every SHA256
+# against SHA256SUMS.txt) and uploads them to the GitHub Release. Run it from the
+# Actions tab ("Run workflow"). Nothing needs to be uploaded from a home computer.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag
+        default: v1
+        required: true
+      models:
+        description: Which models to build (4b, 8b or all)
+        default: all
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h /
+
+      - name: Install gguf tools
+        run: pip install gguf==0.19.0
+
+      - name: Create the release if it does not exist
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" \
+            --title "LarkquillAI Local $TAG" \
+            --notes-file RELEASE_NOTES.md
+
+      - name: Build and upload 4B
+        if: inputs.models == '4b' || inputs.models == 'all'
+        run: |
+          sh scripts/build-release.sh 4b build
+          gh release upload "$TAG" build/larkquill-local-4b-Q4_K_M.gguf.part* --clobber
+          rm -f build/larkquill-local-4b-Q4_K_M.gguf.part*
+
+      - name: Build and upload 8B
+        if: inputs.models == '8b' || inputs.models == 'all'
+        run: |
+          sh scripts/build-release.sh 8b build
+          gh release upload "$TAG" build/larkquill-local-8b-Q4_K_M.gguf.part* --clobber
+          rm -f build/larkquill-local-8b-Q4_K_M.gguf.part*
+
+      - name: Upload checksums and Modelfiles
+        run: |
+          cp modelfiles/Modelfile.4b build/Modelfile.4b
+          cp modelfiles/Modelfile.8b build/Modelfile.8b
+          gh release upload "$TAG" SHA256SUMS.txt build/Modelfile.4b build/Modelfile.8b install/install.sh install/install.ps1 --clobber

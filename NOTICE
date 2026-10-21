@@ -1,0 +1,27 @@
+LarkquillAI Local
+Copyright 2026 LarkquillAI
+
+This repository and its GitHub Releases distribute two GGUF model files that are
+derivatives of third-party open-weight models, each under the Apache License 2.0.
+
+1. LarkquillAI Local 4B (larkquill-local-4b-Q4_K_M.gguf)
+   Based on Qwen3.5-4B, Copyright 2026 Alibaba Cloud.
+   Source: https://huggingface.co/Qwen/Qwen3.5-4B
+   License: Apache License 2.0 (licenses/Qwen3.5-4B-LICENSE.txt)
+   Q4_K_M GGUF quantization by Unsloth: https://huggingface.co/unsloth/Qwen3.5-4B-GGUF
+
+2. LarkquillAI Local 8B (larkquill-local-8b-Q4_K_M.gguf)
+   Based on Granite-4.2-8B by IBM.
+   Source: https://huggingface.co/ibm-granite/granite-4.2-8b
+   License: Apache License 2.0 (licenses/Granite-4.2-8B-LICENSE.txt)
+   Q4_K_M GGUF quantization by IBM: https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF
+
+Modifications (Apache-2.0 section 4(b)):
+   The model weights are unchanged. In each GGUF file, LarkquillAI changed only the
+   metadata fields general.name and general.description. The system prompt, chat
+   template and sampling settings are supplied separately in the Ollama Modelfiles.
+
+Neither upstream model repository ships a NOTICE file.
+
+LarkquillAI is not affiliated with or endorsed by Alibaba Cloud, the Qwen team,
+Unsloth, or IBM. "Qwen" and "Granite" are trademarks of their respective owners.
