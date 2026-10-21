@@ -3,8 +3,8 @@
 # and (if Ollama is installed) registers it as larkquill-local:<size>.
 #
 # One-line install (PowerShell):
-#   $env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/main/install/install.ps1 | iex
-#   $env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/main/install/install.ps1 | iex
+#   $env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex
+#   $env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex
 # Or after downloading the script:
 #   $env:LARKQUILL_SIZE='8b'; powershell -ExecutionPolicy Bypass -File install.ps1
 
@@ -14,7 +14,7 @@ $Dir  = if ($env:LARKQUILL_DIR)  { $env:LARKQUILL_DIR }  else { Join-Path $env:U
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
-$Tag  = 'v1'
+$Tag  = 'local-v1'
 $Repo = 'ilikemacos/larkquillai'
 $Base = if ($env:LARKQUILL_BASE_URL) { $env:LARKQUILL_BASE_URL } else { "https://github.com/$Repo/releases/download/$Tag" }
 $Raw  = if ($env:LARKQUILL_RAW_URL) { $env:LARKQUILL_RAW_URL } else { "https://raw.githubusercontent.com/$Repo/main" }
