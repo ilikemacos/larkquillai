@@ -1,26 +1,39 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.svg" type="image/svg+xml"><title>LarkquillAI Local: download</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#ffffff"><title>LarkquillAI Local: download</title>
 <meta name="description" content="Download LarkquillAI Local: private, offline AI that runs on your own computer. 4B and 8B models for Ollama, LM Studio and llama.cpp.">
 <link rel="canonical" href="https://ilikemacos.github.io/larkquillai/local.html">
-<style>body{margin:0;background:#0b0b0b;color:#ececec;font:15px/1.6 Inter,ui-sans-serif,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center}main{max-width:720px;width:100%;padding:48px 24px}h1{font-size:22px;margin:0 0 6px}p{color:#9a9a9a}h2{font-size:15px;margin:28px 0 8px}h3{font-size:13px;font-weight:500;color:#9a9a9a;margin:14px 0 6px}.cmd{display:flex;gap:8px;align-items:center;background:#171717;border:1px solid #2a2a2a;border-radius:16px;padding:10px 10px 10px 16px}code{flex:1;font:13px ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:nowrap}button,.dl{background:#f2f2f2;color:#111;border:0;border-radius:999px;height:32px;padding:0 14px;font-weight:600;cursor:pointer;font-size:14px}a{color:#cfcfcf}
-.card{background:#121212;border:1px solid #2a2a2a;border-radius:20px;padding:18px 18px 16px;margin-top:16px}.top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.top h2{margin:0 0 2px;font-size:17px}.top p{margin:0;font-size:13px}.dl{display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap}
-.facts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px;padding:0;list-style:none}.facts li{border:1px solid #2a2a2a;border-radius:999px;padding:2px 10px;font-size:12.5px;color:#cfcfcf}
-.files{font-size:12.5px;margin:10px 0 0;color:#8a8a8a}.note{font-size:13px}</style></head>
-<body><main><a href="./">← Back to chat</a><h1 style="margin-top:20px">LarkquillAI Local</h1><p>Private, offline LarkquillAI that runs on your own computer. No account and no internet needed, and nothing you type leaves your device. Works with <a href="https://ollama.com/download">Ollama</a>, LM Studio and llama.cpp.</p>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>main{max-width:760px;margin:0 auto;padding:0 24px 64px}
+.cmd{display:flex;gap:8px;align-items:center;padding:8px 8px 8px 18px}.cmd code{flex:1;font-size:13px;overflow-x:auto;white-space:nowrap}.cmd button{height:32px;flex:none}
+h3{font:500 13px var(--lq-sans);color:var(--lq-muted);margin:16px 0 6px}
+.card{margin-top:16px}.top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.top h2{margin:0 0 2px!important;font-family:var(--lq-serif)!important;font-weight:300!important;font-size:28px!important;letter-spacing:-.01em!important}.top h2 em{color:var(--lq-muted)}.top p{margin:0;font-size:14px}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px;padding:0;list-style:none}
+.files{font-size:13px;margin:12px 0 0}.note{font-size:14px}
+.top .lq-btn{height:40px;padding:0 18px}
+.hero{margin:20px 0 8px}
+</style><link rel="stylesheet" href="lq.css"></head>
+<body><main>
+<nav class="lq-top"><a class="lq-word" href="./"><img src="favicon.svg" alt="">Larkquill<em>AI</em></a><span class="lq-sp"></span><a class="lq-btn lq-ghost" style="height:36px;padding:0 16px;font-size:14px!important" href="./">Open chat</a></nav>
+<section class="hero"><h1 class="lq-display">LarkquillAI <em>Local</em></h1>
+<p class="lq-lede">Private, offline LarkquillAI that runs on your own computer. No account and no internet needed, and nothing you type leaves your device. Works with <a href="https://ollama.com/download">Ollama</a>, LM Studio and llama.cpp.</p></section>
 
-<div class="card"><div class="top"><div><h2>LarkquillAI Local 4B</h2><p>Light and quick. Fits most laptops.</p></div><a class="dl" href="https://github.com/ilikemacos/larkquillai/releases/tag/local-v1">Download 4B</a></div>
-<ul class="facts"><li>2.7 GB download</li><li>8 GB RAM computer</li><li>Based on Qwen3.5-4B</li></ul>
+<div class="card"><div class="top"><div><h2>Local <em>4B</em></h2><p>Light and quick. Fits most laptops.</p></div><a class="lq-btn" href="https://github.com/ilikemacos/larkquillai/releases/tag/local-v1">Download 4B</a></div>
+<ul class="facts"><li class="lq-chip">2.7 GB download</li><li class="lq-chip">8 GB RAM computer</li></ul>
 <h3>macOS / Linux (Terminal, needs Ollama)</h3><div class="cmd"><code>curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 4b</code><button>Copy</button></div>
 <h3>Windows (PowerShell, needs Ollama)</h3><div class="cmd"><code>$env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex</code><button>Copy</button></div>
 <p class="files">Files: <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-4b-Q4_K_M.gguf.part1">part 1</a> · <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-4b-Q4_K_M.gguf.part2">part 2</a></p></div>
 
-<div class="card"><div class="top"><div><h2>LarkquillAI Local 8B</h2><p>Smarter answers, writing and code. Needs more memory.</p></div><a class="dl" href="https://github.com/ilikemacos/larkquillai/releases/tag/local-v1">Download 8B</a></div>
-<ul class="facts"><li>5.3 GB download</li><li>16 GB RAM computer</li><li>Based on Granite-4.2-8B</li></ul>
+<div class="card"><div class="top"><div><h2>Local <em>8B</em></h2><p>Smarter answers, writing and code. Needs more memory.</p></div><a class="lq-btn" href="https://github.com/ilikemacos/larkquillai/releases/tag/local-v1">Download 8B</a></div>
+<ul class="facts"><li class="lq-chip">5.3 GB download</li><li class="lq-chip">16 GB RAM computer</li></ul>
 <h3>macOS / Linux (Terminal, needs Ollama)</h3><div class="cmd"><code>curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 8b</code><button>Copy</button></div>
 <h3>Windows (PowerShell, needs Ollama)</h3><div class="cmd"><code>$env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex</code><button>Copy</button></div>
 <p class="files">Files: <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-8b-Q4_K_M.gguf.part1">part 1</a> · <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-8b-Q4_K_M.gguf.part2">part 2</a> · <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-8b-Q4_K_M.gguf.part3">part 3</a></p></div>
 
-<h2>After installing</h2><div class="cmd"><code>ollama run larkquill-local:4b</code><button>Copy</button></div>
-<p class="note">Use <code style="white-space:normal">larkquill-local:8b</code> for the 8B. Add <code style="white-space:normal">--think=false</code> for faster, direct answers.</p>
-<h2>Downloading by hand?</h2><p class="note">The models come in parts because GitHub allows 2 GB per file. Download every part of one model, then join them: <code style="white-space:normal">cat file.part1 file.part2 &gt; file.gguf</code> on macOS/Linux or <code style="white-space:normal">copy /b file.part1 + file.part2 file.gguf</code> on Windows. Then open the .gguf in LM Studio. Checksums and full steps are in the <a href="https://github.com/ilikemacos/larkquillai/tree/models#readme">model guide</a>.</p>
-<p class="note" style="margin-top:24px">LarkquillAI Local runs small open models on your computer, so answers are simpler than the online chat and it can't browse the web. Built on Qwen3.5-4B by the Qwen team and Granite-4.2-8B by IBM, both under the Apache 2.0 license. <a href="https://github.com/ilikemacos/larkquillai/blob/models/NOTICE">Credits</a></p></main>
+<h2 style="margin-top:40px">After installing</h2><div class="cmd"><code>ollama run larkquill-local:4b</code><button>Copy</button></div>
+<p class="note">Use <code>larkquill-local:8b</code> for the 8B. Add <code>--think=false</code> for faster, direct answers.</p>
+<h2 style="margin-top:32px">Downloading by hand?</h2><p class="note">The models come in parts because GitHub allows 2 GB per file. Download every part of one model, then join them: <code>cat file.part1 file.part2 &gt; file.gguf</code> on macOS/Linux or <code>copy /b file.part1 + file.part2 file.gguf</code> on Windows. Then open the .gguf in LM Studio. Checksums and full steps are in the <a href="https://github.com/ilikemacos/larkquillai/tree/models#readme">model guide</a>.</p>
+<p class="note">LarkquillAI Local runs small open models on your computer, so answers are simpler than the online chat and it can't browse the web.</p>
+<footer class="lq-foot"><a href="./">Chat</a><a href="desktop.html">Desktop app</a><a href="api.html">API</a><span style="flex:1"></span><a class="btn lq-credits-btn" data-lq-credits href="https://github.com/ilikemacos/larkquillai/blob/models/NOTICE">Credits</a></footer>
+</main>
+<script src="credits.js"></script>
 <script>document.querySelectorAll(".cmd button").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.previousElementSibling.textContent);b.textContent="Copied"}catch{b.textContent="Failed"}setTimeout(()=>b.textContent="Copy",1200)})</script></body></html>

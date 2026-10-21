@@ -5,8 +5,8 @@
   "start_url": "/larkquillai/",
   "scope": "/larkquillai/",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111",
+  "background_color": "#ffffff",
+  "theme_color": "#3e5a92",
   "icons": [
     {
       "src": "icon-192.png",

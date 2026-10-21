@@ -1,16 +1,16 @@
 // Sky backdrop: a soft three-stop gradient that follows the local time of day (dawn, day, golden hour, dusk,
 // night), blended smoothly between keyframes and refreshed every few minutes. Also sets --sky-ink so text that
 // sits straight on the sky (header, footer) stays readable after dark.
-const K = [ // hour, top, middle, bottom
-  [0,    "#141a33", "#252b52", "#40406a"],
+const K = [ // hour, top, middle, bottom (dusty blue overhead, warm haze at the horizon)
+  [0,    "#141a33", "#262c55", "#43416c"],
   [5,    "#1f2a4d", "#4c4f7e", "#8a6f8f"],
-  [6.5,  "#8d9cc9", "#d9aeb4", "#f4c19c"],
-  [8.5,  "#8db0de", "#b9cfee", "#e6edf8"],
-  [15.5, "#93b3dc", "#c3d4ee", "#ece8f2"],
-  [18,   "#97a0c3", "#dca995", "#f29a68"],
-  [19.5, "#5b5f8e", "#a1789a", "#e2876a"],
-  [21,   "#20284a", "#363b68", "#5b5078"],
-  [24,   "#141a33", "#252b52", "#40406a"],
+  [6.5,  "#7c8fc4", "#c9a9bd", "#f1c3a0"],
+  [8.5,  "#86a2d3", "#b8c5e6", "#eee2da"],
+  [15.5, "#82a0d0", "#bcc4e2", "#f0dccb"],
+  [18,   "#7d8bbd", "#c9a3a8", "#eeb38b"],
+  [19.5, "#4e5f96", "#9180a6", "#e3a283"],
+  [21,   "#22305a", "#3b4377", "#6b5a82"],
+  [24,   "#141a33", "#262c55", "#43416c"],
 ];
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const mix = (a, b, t) => { const x = hex(a), y = hex(b); return "rgb(" + x.map((v, i) => Math.round(v + (y[i] - v) * t)).join(",") + ")"; };

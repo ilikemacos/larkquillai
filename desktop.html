@@ -1,8 +1,54 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.svg" type="image/svg+xml"><title>LarkquillAI desktop</title>
-<style>body{margin:0;background:#0b0b0b;color:#ececec;font:15px/1.6 Inter,ui-sans-serif,-apple-system,"Segoe UI",sans-serif;display:flex;justify-content:center}main{max-width:720px;width:100%;padding:48px 24px}h1{font-size:22px;margin:0 0 6px}p{color:#9a9a9a}h2{font-size:15px;margin:28px 0 8px}.cmd{display:flex;gap:8px;align-items:center;background:#171717;border:1px solid #2a2a2a;border-radius:16px;padding:10px 10px 10px 16px}code{flex:1;font:13px ui-monospace,Menlo,Consolas,monospace;overflow-x:auto;white-space:nowrap}button{background:#f2f2f2;color:#111;border:0;border-radius:999px;height:32px;padding:0 14px;font-weight:600;cursor:pointer}a{color:#cfcfcf}</style></head>
-<body><main><a href="./">← Back to chat</a><h1 style="margin-top:20px">LarkquillAI for desktop</h1><p>Windows and macOS. The app updates itself automatically when a new version is out.</p>
-<h2>macOS (Terminal)</h2><div class="cmd"><code>curl -fsSL https://ilikemacos.github.io/larkquillai/install.sh | sh</code><button>Copy</button></div>
-<h2>Windows (PowerShell)</h2><div class="cmd"><code>irm https://ilikemacos.github.io/larkquillai/install.ps1 | iex</code><button>Copy</button></div>
-<p style="margin-top:24px">Or download the installers from the <a href="https://github.com/ilikemacos/wyneai-desktop/releases/latest">latest release</a>.</p>
-<h2>Run fully offline</h2><p style="margin-top:0">Want LarkquillAI with no internet at all? <a href="local.html">Download LarkquillAI Local</a>: 4B and 8B models that run on your own computer.</p></main>
-<script>document.querySelectorAll(".cmd button").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.previousElementSibling.textContent);b.textContent="Copied"}catch{b.textContent="Failed"}setTimeout(()=>b.textContent="Copy",1200)})</script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#ffffff"><title>LarkquillAI for desktop</title>
+<meta name="description" content="Download LarkquillAI for macOS and Windows.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>main{max-width:760px;margin:0 auto;padding:0 24px 64px}
+.hero{border-radius:28px;padding:44px 36px 36px;margin-top:20px;position:relative;overflow:hidden}
+.hero h1{color:#fff!important;margin:0 0 10px!important}.hero h1 em{color:rgba(255,255,255,.72)!important}
+.hero p{color:rgba(255,255,255,.86);font-size:17px;max-width:30em;margin:0 0 26px}
+.dls{display:flex;gap:10px;flex-wrap:wrap}.hero .lq-btn{background:#fff!important;color:#141414!important;border-color:#fff!important}.hero .lq-btn:hover{background:rgba(255,255,255,.88)!important}
+.hero .lq-btn.lq-ghost{background:rgba(255,255,255,.16)!important;color:#fff!important;border-color:transparent!important;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.hero .lq-btn.lq-ghost:hover{background:rgba(255,255,255,.26)!important}
+.hero small{display:block;margin-top:16px;color:rgba(255,255,255,.7);font-size:13px}.hero small a{color:#fff;text-decoration-color:rgba(255,255,255,.5)}
+.bubbles{display:flex;flex-direction:column;gap:8px;margin:30px 0 0;max-width:420px}
+.bubbles span{align-self:flex-end;background:rgba(255,255,255,.2);color:#fff;border-radius:20px;padding:10px 14px;font-size:14px;line-height:1.35;-webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px);box-shadow:0 1px 2px rgba(29,29,31,.1),0 8px 24px rgba(29,29,31,.12)}
+.bubbles span.a{align-self:flex-start;background:rgba(28,36,78,.5)}
+h2{margin:40px 0 10px!important}
+.cmd{display:flex;gap:8px;align-items:center;padding:8px 8px 8px 18px}
+.cmd code{flex:1;font-size:13px;overflow-x:auto;white-space:nowrap}
+.cmd button{height:32px;flex:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.grid .card h3{margin:0 0 4px;font:500 15px var(--lq-sans)}.grid .card p{margin:0;font-size:14px}
+@media(max-width:640px){.hero{padding:32px 22px 26px;border-radius:24px}.grid{grid-template-columns:1fr}.dls .lq-btn{flex:1 1 100%}}
+</style><link rel="stylesheet" href="lq.css"></head>
+<body><main>
+<nav class="lq-top"><a class="lq-word" href="./"><img src="favicon.svg" alt="">Larkquill<em>AI</em></a><span class="lq-sp"></span><a class="lq-btn lq-ghost" style="height:36px;padding:0 16px;font-size:14px!important" href="./">Open chat</a></nav>
+
+<section class="hero lq-sky">
+  <h1 class="lq-display" style="margin-top:0!important">LarkquillAI for <em>desktop</em></h1>
+  <p>Chat, code and get things done on your computer. For macOS and Windows, and it updates itself when a new version is out.</p>
+  <div class="dls">
+    <a class="lq-btn" id="dl-mac" href="https://github.com/ilikemacos/wyneai-desktop/releases/latest/download/LarkquillAI_universal.dmg">Download for Mac</a>
+    <a class="lq-btn lq-ghost" id="dl-win" href="https://github.com/ilikemacos/wyneai-desktop/releases/latest/download/LarkquillAI_x64-setup.exe">Download for Windows</a>
+  </div>
+  <small>macOS 10.15 or later (Apple silicon and Intel) · Windows 10 and 11 (64-bit) · <a href="https://github.com/ilikemacos/wyneai-desktop/releases/latest">All files</a></small>
+  <div class="bubbles" aria-hidden="true"><span>Make my project folder tidy and explain what changed.</span><span class="a">Done. I grouped 42 files into src, docs and assets, and listed every move in CHANGES.md.</span></div>
+</section>
+
+<h2>Install from the command line</h2>
+<p class="sub" style="margin:0 0 10px">Same app, installed in one line.</p>
+<div class="cmd"><code>curl -fsSL https://ilikemacos.github.io/larkquillai/install.sh | sh</code><button>Copy</button></div>
+<p class="sub" style="margin:6px 0 14px;font-size:13px">macOS, in Terminal</p>
+<div class="cmd"><code>irm https://ilikemacos.github.io/larkquillai/install.ps1 | iex</code><button>Copy</button></div>
+<p class="sub" style="margin:6px 0 0;font-size:13px">Windows, in PowerShell</p>
+
+<div class="grid">
+  <div class="card"><h3>First launch on Mac</h3><p>The app isn't notarized yet. Right-click LarkquillAI in Applications, choose Open, then confirm.</p></div>
+  <div class="card"><h3>First launch on Windows</h3><p>On the SmartScreen notice, click More info, then Run anyway.</p></div>
+</div>
+
+<h2>Run fully offline</h2>
+<p style="margin-top:0">Want LarkquillAI with no internet at all? <a href="local.html">Get LarkquillAI Local</a>: 4B and 8B models that run on your own computer.</p>
+<footer class="lq-foot"><a href="./">Chat</a><a href="api.html">API</a><a href="local.html">Local</a><span class="lq-sp" style="flex:1"></span><span>LarkquillAI</span></footer>
+</main>
+<script>document.querySelectorAll(".cmd button").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.previousElementSibling.textContent);b.textContent="Copied"}catch{b.textContent="Failed"}setTimeout(()=>b.textContent="Copy",1200)})
+// Put the visitor's platform first.
+if(/Win/i.test(navigator.platform||navigator.userAgent)){const m=document.getElementById("dl-mac"),w=document.getElementById("dl-win");m.classList.add("lq-ghost");w.classList.remove("lq-ghost");w.parentNode.insertBefore(w,m)}</script></body></html>

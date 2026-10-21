@@ -3,7 +3,7 @@ import { vfs, resolve, downloadText, zipFiles, runAgent, IDENTITY } from "./core
 import { authInfo } from "./auth.js";
 const PY_BASE = "https://larkquillai.vercel.app/pyodide/";
 let term, fit, cwd = "/", line = "", cur = 0, hist = [], hi = 0, busy = null, opened = false, ui = {};
-const C = { dim: s => `\x1b[2m${s}\x1b[0m`, acc: s => `\x1b[38;2;255;106;43m${s}\x1b[0m`, err: s => `\x1b[38;2;224;106;90m${s}\x1b[0m`, dir: s => `\x1b[38;2;130;170;255m${s}\x1b[0m` };
+const C = { dim: s => `\x1b[2m${s}\x1b[0m`, acc: s => `\x1b[38;2;240;180;140m${s}\x1b[0m`, err: s => `\x1b[38;2;224;106;90m${s}\x1b[0m`, dir: s => `\x1b[38;2;130;170;255m${s}\x1b[0m` };
 const out = s => term.write(String(s).replace(/\r?\n/g, "\r\n"));
 const outln = s => out(s + "\n");
 const tag = () => sbx ? C.acc("larkquill") + C.dim("@cloud") + " " + C.dir(sbx.cwd) : C.acc("larkquill") + " " + C.dir(cwd);
@@ -110,7 +110,7 @@ function renderTree() { const el = ui.tree; if (!el) return; el.innerHTML = ""; 
 export function initTerminal(opts) { ui = opts; vfs.listeners.add(renderTree); renderTree(); }
 export function toggleTerminal(force) { const panel = ui.panel, show = force ?? panel.hidden; panel.hidden = !show; document.body.classList.toggle("term-open", show);
   if (show && !opened) { opened = true; term = new window.Terminal({ fontFamily: '"JetBrains Mono", ui-monospace, Menlo, monospace', fontSize: 13, cursorBlink: true, convertEol: false,
-      theme: { background: "#0c0c0c", foreground: "#ececec", cursor: "#ff6a2b", selectionBackground: "#3a3a3a", black: "#111111", blue: "#82aaff", brightBlack: "#6a6a6a" } });
+      allowTransparency: true, theme: { background: "rgba(0,0,0,0)", foreground: "#ececec", cursor: "#f0b48c", selectionBackground: "rgba(255,255,255,.18)", black: "#111111", blue: "#82aaff", brightBlack: "#6a6a6a" } });
     fit = new window.FitAddon.FitAddon(); term.loadAddon(fit); term.open(ui.host); term.onData(onData); new ResizeObserver(() => { try { fit.fit(); } catch {} }).observe(ui.host);
     outln(C.acc("LarkquillAI terminal") + C.dim("  ·  type help  ·  files are saved in this browser"));
     if (authInfo().user) { busy = { cancel() {} }; cloudStart(false).finally(() => { busy = null; prompt(); }); } else prompt(); }
