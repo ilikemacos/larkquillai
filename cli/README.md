@@ -26,7 +26,7 @@ larkquill
 - `larkquill` starts an interactive session in the current folder.
 - `larkquill "add a README to this project"` runs one task and exits.
 - LarkquillAI can list and read files in this folder. It asks before writing a file or running a command. `-y` approves everything automatically.
-- `--tier=chirp|trill|aria|chorus` sets the reply length.
+- `--tier=wren|scribe|sage|sovereign` picks the model (Quill Wren, Scribe, Sage, Sovereign; old `chirp|trill|aria|chorus` still work).
 - In a session, `/clear` forgets the conversation and `/exit` quits.
 
 This package isn't published to npm.

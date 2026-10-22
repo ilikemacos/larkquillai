@@ -3,13 +3,13 @@
 import fs from "node:fs/promises"; import path from "node:path"; import { spawn } from "node:child_process"; import readline from "node:readline";
 const API = process.env.LARKQUILL_API || process.env.WRENBY_API || "https://larkquillai.vercel.app/api/chat";
 const argv = process.argv.slice(2); const YES = argv.includes("-y") || argv.includes("--yes"); const once = argv.filter(a => !a.startsWith("-")).join(" ");
-const TIER_IN = (argv.find(a => a.startsWith("--tier=")) || "--tier=turbo").slice(7).toLowerCase(); const TIER = ({ chirp: "spark", trill: "turbo", aria: "forge", chorus: "zenith" })[TIER_IN.replace(/[-\s]?[\d.]+$/, "")] || TIER_IN; const MAXT = { spark: 6144, turbo: 24576, forge: 49152, zenith: 73728 }[TIER] || 24576;
+const TIER_IN = (argv.find(a => a.startsWith("--tier=")) || "--tier=turbo").slice(7).toLowerCase(); const TIER = ({ chirp: "spark", trill: "turbo", aria: "forge", chorus: "zenith", wren: "spark", scribe: "turbo", sage: "forge", sovereign: "zenith" })[TIER_IN.replace(/[-\s]?[\d.]+$/, "")] || TIER_IN; const MAXT = { spark: 6144, turbo: 24576, forge: 49152, zenith: 73728 }[TIER] || 24576;
 if (argv.includes("-h") || argv.includes("--help")) { console.log(`larkquill — LarkquillAI coding agent for your terminal
 
   larkquill              interactive session in the current folder
   larkquill "prompt"     run one task and exit
   -y, --yes              approve every file write and command without asking
-  --tier=chirp|trill|aria|chorus   model: Chirp 1.1, Trill 1 (default), Aria 1.5, Chorus 0.7
+  --tier=wren|scribe|sage|sovereign   model: Quill Wren, Quill Scribe (default), Quill Sage, Quill Sovereign (old chirp|trill|aria|chorus still work)
 
 In a session: /exit to quit, /clear to forget the conversation, /help.`); process.exit(0); }
 const ROOT = process.cwd(); const tty = process.stdout.isTTY;

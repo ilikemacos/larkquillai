@@ -26,7 +26,7 @@ larkquill
 - `larkquill` starts an interactive session in the current folder.
 - `larkquill "add a README to this project"` runs one task and exits.
 - LarkquillAI can list and read files in this folder. It asks before writing a file or running a command. `-y` approves everything automatically.
-- `--tier=chirp|trill|aria|chorus` sets the reply length.
+- `--tier=wren|scribe|sage|sovereign` picks the model (Quill Wren, Scribe, Sage, Sovereign; old `chirp|trill|aria|chorus` still work).
 - In a session, `/clear` forgets the conversation and `/exit` quits.
 
 This package isn't published to npm.
@@ -53,6 +53,6 @@ The chat app lives on GitHub Pages at https://ilikemacos.github.io/larkquillai/ 
 
 - Dashboard and API keys: https://larkquillai.vercel.app/api
 - OpenAI-compatible base URL: `https://larkquillai.vercel.app/v1`
-- Models: `larkquill-chirp-1`, `larkquill-trill-1`, `larkquill-aria-1.5`, `larkquill-chorus-0.7`
+- Models: `quill-wren` (Quill Wren, fast and lightweight), `quill-scribe` (Quill Scribe, everyday default), `quill-sage` (Quill Sage, advanced reasoning), `quill-sovereign` (Quill Sovereign, most capable flagship). Old IDs (`larkquill-chirp-1.1`, `larkquill-chirp-1`, `larkquill-trill-1`, `larkquill-aria-1.5`, `larkquill-chorus-0.7`, `wrenby-*`) still work.
 
 LarkquillAI was called WrenbyAI until October 2026. The old `wrenby-*` model IDs, the old base URLs (`https://preset-ai-chat.vercel.app/v1`, `https://wrenbyai.chopstickshq.com/v1`, and the alias `https://larkquillai.chopstickshq.com/v1`) and https://ilikemacos.github.io/wrenbyai/ all still work.
