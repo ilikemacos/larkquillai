@@ -2,6 +2,15 @@
 // Same per-user prefs as there: wy.static { on, shimmer, chunky } and wy.inv.
 import { staticPrefs, setStaticPrefs, isInverted, setInverted, SKY } from "./static.js";
 import { getCompanion, setCompanion, COMPANIONS } from "./companion.js";
+import { openUpgrade } from "./chatkit.js";
+const PN = { hobby: "Hobby", pro: "Pro", max: "Max" }, PM = { hobby: "Chirp 1 and Trill 1", pro: "Chirp 1, Trill 1 and Aria 1.5", max: "Every model, including Chorus 0.7" };
+// Current plan (Hobby when signed out), from the LarkquillAI backend.
+async function planRow() { const pb = el("button", "pri", "See plans"); pb.type = "button"; const r = row("Plan", "Loading…", pb); const d = r.querySelector(".d"), t = r.querySelector(".t");
+  let plan = "hobby"; pb.onclick = () => openUpgrade(plan === "pro" ? "max" : null);
+  try { const tok = localStorage.getItem("wy.token"); const x = await fetch("https://larkquillai.vercel.app/api/billing?action=plan", { headers: tok ? { authorization: "Bearer " + tok } : {} });
+    if (x.ok) { plan = (await x.json()).plan || "hobby"; d.textContent = PM[plan] + ". One-time purchase, tied to your account."; } else { d.textContent = "Chirp 1 and Trill 1. Sign in and upgrade for Aria and Chorus."; } }
+  catch { d.textContent = "Couldn't load your plan."; }
+  t.textContent = "Plan: LarkquillAI " + PN[plan]; pb.textContent = plan === "max" ? "See plans" : plan === "pro" ? "Upgrade to Max" : "Upgrade"; return r; }
 const CSS = `.wy-sl{padding:0;border:1px solid #262626;border-radius:18px;background:#0e0e0e;color:#ececec;width:min(520px,94vw)}
 .wy-sl::backdrop{background:#000a}.wy-sl .b{padding:22px 26px}.wy-sl h2{font-size:18px;margin:0 0 2px}.wy-sl .sub{color:#8a8a8a;font-size:13px;margin:0 0 8px}
 .wy-sl .row{display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid #1b1b1b}.wy-sl .l{flex:1}.wy-sl .t{font-size:13px}.wy-sl .d{font-size:12px;color:#7d7d7d}
@@ -19,6 +28,7 @@ export function openSettings() {
   b.append(el("h2", "", "General"), el("p", "sub", "How LarkquillAI looks."),
     (() => { const seg = el("div", "seg"); for (const [c, n] of Object.entries(COMPANIONS)) { const x = el("button", getCompanion() === c ? "on" : "", n); x.type = "button"; x.onclick = () => { setCompanion(c); seg.querySelectorAll("button").forEach(y => y.classList.toggle("on", y === x)); }; seg.append(x); }
       return row("Companion", "Who keeps you company while LarkquillAI works: Larkquill, or Milyy and her ball. Saved to your account.", seg); })(),
+    (() => { const ph = el("div"); planRow().then(r => ph.replaceWith(r)); return ph; })(),
     (() => { const ak = el("button", "", "API keys"); ak.type = "button"; ak.className = "pri"; ak.onclick = () => window.open(new URL("api.html", location.href).href, "_blank", "noopener");
       return row("API keys", "Create and manage keys for the LarkquillAI developer API, and read the docs.", ak); })(),
     ...(SKY ? [] : [row("Pixel background", "The moving pixel static at the edges. Off keeps a plain background; clicking the background still inverts.", sw(p.on !== false, v => setStaticPrefs({ on: v }))),
