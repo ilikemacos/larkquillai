@@ -5,7 +5,7 @@
 //  - code blocks: language label + copy button + highlight.js (vendored in ./md/) with a light sky palette
 // Styles live in sky.css (it is kept as the last stylesheet, so they win over older themes).
 export const MODELS = [
-  { id: "spark",  name: "Chirp 1",       hint: "Fastest, short answers" },
+  { id: "spark",  name: "Chirp 1.1",     hint: "Fastest, short answers" },
   { id: "turbo",  name: "Trill 1",       hint: "Fast, longer answers" },
   { id: "forge",  name: "Aria 1.5",      hint: "Balanced, big memory" },
   { id: "zenith", name: "Chorus 0.7",    hint: "Deepest, slower, uses the most" },

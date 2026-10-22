@@ -9,7 +9,7 @@ if (argv.includes("-h") || argv.includes("--help")) { console.log(`larkquill —
   larkquill              interactive session in the current folder
   larkquill "prompt"     run one task and exit
   -y, --yes              approve every file write and command without asking
-  --tier=chirp|trill|aria|chorus   model: Chirp 1, Trill 1 (default), Aria 1.5, Chorus 0.7
+  --tier=chirp|trill|aria|chorus   model: Chirp 1.1, Trill 1 (default), Aria 1.5, Chorus 0.7
 
 In a session: /exit to quit, /clear to forget the conversation, /help.`); process.exit(0); }
 const ROOT = process.cwd(); const tty = process.stdout.isTTY;
