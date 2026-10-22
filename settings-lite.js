@@ -3,12 +3,12 @@
 import { isInverted, setInverted, SKY } from "./static.js";
 import { getCompanion, setCompanion, COMPANIONS } from "./companion.js";
 import { openUpgrade } from "./chatkit.js";
-const PN = { hobby: "Hobby", pro: "Pro", max: "Max" }, PM = { hobby: "Quill Wren 1.1 and Quill Scribe 1", pro: "Quill Wren 1.1, Quill Scribe 1 and Quill Sage 1.4", max: "Every model, including Quill Sovereign 0.4" };
+const PN = { hobby: "Hobby", pro: "Pro", max: "Max" }, PM = { hobby: "Quill Wren 1.2 and Quill Scribe 1", pro: "Quill Wren 1.2, Quill Scribe 1 and Quill Sage 1.5", max: "Every model, including Quill Sovereign 0.5" };
 // Current plan (Hobby when signed out), from the LarkquillAI backend.
 async function planRow() { const pb = el("button", "pri", "See plans"); pb.type = "button"; const r = row("Plan", "Loading…", pb); const d = r.querySelector(".d"), t = r.querySelector(".t");
   let plan = "hobby"; pb.onclick = () => openUpgrade(plan === "pro" ? "max" : null);
   try { const tok = localStorage.getItem("wy.token"); const x = await fetch("https://larkquillai.vercel.app/api/billing?action=plan", { headers: tok ? { authorization: "Bearer " + tok } : {} });
-    if (x.ok) { plan = (await x.json()).plan || "hobby"; d.textContent = PM[plan] + ". One-time purchase, tied to your account."; } else { d.textContent = "Quill Wren 1.1 and Quill Scribe 1. Sign in and upgrade for Quill Sage 1.4 and Quill Sovereign 0.4."; } }
+    if (x.ok) { plan = (await x.json()).plan || "hobby"; d.textContent = PM[plan] + ". One-time purchase, tied to your account."; } else { d.textContent = "Quill Wren 1.2 and Quill Scribe 1. Sign in and upgrade for Quill Sage 1.5 and Quill Sovereign 0.4."; } }
   catch { d.textContent = "Couldn't load your plan."; }
   t.textContent = "Plan: LarkquillAI " + PN[plan]; pb.textContent = plan === "max" ? "See plans" : plan === "pro" ? "Upgrade to Max" : "Upgrade"; return r; }
 const CSS = `.wy-sl{padding:0;border:1px solid #262626;border-radius:18px;background:#0e0e0e;color:#ececec;width:min(520px,94vw)}
