@@ -1,6 +1,6 @@
 // Settings → General for the GitHub Pages site (the full Settings lives in the Vercel/desktop app).
-// Same per-user prefs as there: wy.static { on, shimmer, chunky } and wy.inv.
-import { staticPrefs, setStaticPrefs, isInverted, setInverted, SKY } from "./static.js";
+// Same per-user prefs as there: wy.inv (the pixel background and its prefs were removed).
+import { isInverted, setInverted, SKY } from "./static.js";
 import { getCompanion, setCompanion, COMPANIONS } from "./companion.js";
 import { openUpgrade } from "./chatkit.js";
 const PN = { hobby: "Hobby", pro: "Pro", max: "Max" }, PM = { hobby: "Quill Wren 1.1 and Quill Scribe 1", pro: "Quill Wren 1.1, Quill Scribe 1 and Quill Sage 1.4", max: "Every model, including Quill Sovereign 0.4" };
@@ -24,17 +24,13 @@ function row(t, d, c) { const r = el("div", "row"), l = el("div", "l"); l.append
 export function openSettings() {
   if (!document.getElementById("wy-sl-css")) { const s = el("style"); s.id = "wy-sl-css"; s.textContent = CSS; document.head.append(s); }
   const dlg = el("dialog", "wy-sl"), b = el("div", "b"), x = el("button", "x", "✕"); x.onclick = () => dlg.close(); dlg.style.position = "relative";
-  const p = staticPrefs();
   b.append(el("h2", "", "General"), el("p", "sub", "How LarkquillAI looks."),
     (() => { const seg = el("div", "seg"); for (const [c, n] of Object.entries(COMPANIONS)) { const x = el("button", getCompanion() === c ? "on" : "", n); x.type = "button"; x.onclick = () => { setCompanion(c); seg.querySelectorAll("button").forEach(y => y.classList.toggle("on", y === x)); }; seg.append(x); }
       return row("Companion", "Who keeps you company while LarkquillAI works: Larkquill, or Milyy and her ball. Saved to your account.", seg); })(),
     (() => { const ph = el("div"); planRow().then(r => ph.replaceWith(r)); return ph; })(),
     (() => { const ak = el("button", "", "API keys"); ak.type = "button"; ak.className = "pri"; ak.onclick = () => window.open(new URL("api.html", location.href).href, "_blank", "noopener");
       return row("API keys", "Create and manage keys for the LarkquillAI developer API, and read the docs.", ak); })(),
-    ...(SKY ? [] : [row("Pixel background", "The moving pixel static at the edges. Off keeps a plain background; clicking the background still inverts.", sw(p.on !== false, v => setStaticPrefs({ on: v }))),
-    row("Inverted theme", "White background, black squares. You can also click the empty background.", sw(isInverted(), v => setInverted(v))),
-    row("Shimmer", "Squares flicker slowly. Off keeps the static still.", sw(p.shimmer, v => setStaticPrefs({ shimmer: v }))),
-    row("Chunky squares", "Twice the square size.", sw(p.chunky, v => setStaticPrefs({ chunky: v })))]));
+    ...(SKY ? [] : [row("Inverted theme", "Light background. You can also click the empty background.", sw(isInverted(), v => setInverted(v)))]));
   dlg.append(x, b); document.body.append(dlg); dlg.addEventListener("close", () => dlg.remove()); dlg.showModal();
 }
 export function initSettings() {

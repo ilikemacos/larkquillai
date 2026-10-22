@@ -5,7 +5,7 @@ import { initTerminal, toggleTerminal } from "./term.js";
 import { initAuth, authInfo } from "./auth.js";
 import { runCloudTask, classifyRemote, LOOSE } from "./cloudtask.js";
 import { applyTheme } from "./theme.js";
-import { initChatKit, renderImages, enhanceCode, QUOTA_TIERS } from "./chatkit.js";
+import { initChatKit, renderImages, enhanceCode, QUOTA_TIERS, modelName } from "./chatkit.js";
 import { onAuthChange } from "./auth.js";
 let session = null;
 const $ = s => document.querySelector(s), log = $("#log"), q = $("#q"), send = $("#send"), status = $("#status");
@@ -63,7 +63,14 @@ async function ask(text, images = [], { showUser = true } = {}) {
   history.push({ role: "user", content: text + imgNote(images.length) }); ctrl = new AbortController(); kit?.setBusy(true, () => ctrl?.abort());
   // images ride only on this request's last user message; history keeps the text note
   const reqHist = () => { const h = history.slice(-40); if (images.length) h[h.length - 1] = { role: "user", content: [{ type: "text", text }, ...images.map(i => ({ type: "image_url", image_url: { url: i.url } }))] }; return h; };
-  let content = "", reasoning = "", thinkDone = false; const endThink = () => { if (!thinkDone) { thinkDone = true; th.done(); } };
+  let content = "", reasoning = "", thinkDone = false; const endThink = () => { slow.remove(); clearInterval(slowIv); if (!thinkDone) { thinkDone = true; th.done(); } };
+  // Live status while nothing arrives: after ~8 s of silence name the model, count seconds, offer Cancel (aborts the request).
+  const slow = document.createElement("div"); slow.className = "wy-slow"; slow.hidden = true; slow.setAttribute("role", "status");
+  slow.innerHTML = '<span class="wy-slow-t"></span><button type="button" class="wy-slow-x">Cancel</button>'; bub.insertBefore(slow, out);
+  slow.querySelector(".wy-slow-x").onclick = () => { slow.hidden = true; ctrl?.abort(); };
+  const s0 = Date.now(); let lastAct = s0, retried = false; const act = () => { lastAct = Date.now(); slow.hidden = true; };
+  const slowIv = setInterval(() => { if (thinkDone || Date.now() - lastAct < 8000) return; slow.hidden = false;
+    slow.querySelector(".wy-slow-t").textContent = modelName(tier) + (retried ? " didn't answer, retrying once, still working\u2026 " : " is busy, still working\u2026 ") + Math.round((Date.now() - s0) / 1000) + "s"; }, 250);
   try {
     if ((tier === "forge" || tier === "zenith") && !images.length && LOOSE.test(text)) {
       if (authInfo().user) { const ct = await runCloudTask(bub, text, tier, { signal: ctrl.signal, onStatus: s => status.textContent = s }).catch(e => { if (e.name === "AbortError") throw e; const w = document.createElement("div"); w.className = "warn"; w.textContent = "Cloud sandbox unavailable (" + e.message + "), answering in chat instead."; bub.appendChild(w); return null; });
@@ -74,12 +81,12 @@ async function ask(text, images = [], { showUser = true } = {}) {
       else classifyRemote(text, tier).then(c => { if (c.hard) { const h = document.createElement("div"); h.className = "warn"; h.textContent = "Sign in to run this in a cloud sandbox (real install, build and test)."; bub.appendChild(h); } }).catch(() => {});
     }
     const r = await runAgent([{ role: "system", content: SYS }, ...reqHist()], { tier, maxTokens: MAXT[tier], signal: ctrl.signal,
-      on: { search: j => (th.toWeb(), 0) || step(th, "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s")),
-        reasoning: rs => { reasoning = rs; th.reason.hidden = false; md(th.reason, rs); },
-        content: c => { endThink(); status.textContent = "Writing…"; content = c; md(out, c); },
-        retry: () => step(th, "No answer came back · retrying once"),
+      on: { search: j => (act(), th.toWeb(), 0) || step(th, "Searched the web · " + j.count + " result" + (j.count === 1 ? "" : "s")),
+        reasoning: rs => { act(); reasoning = rs; th.reason.hidden = false; md(th.reason, rs); },
+        content: c => { act(); endThink(); status.textContent = "Writing…"; content = c; md(out, c); },
+        retry: () => (retried = true, step(th, "No answer came back · retrying once")),
         quota: j => kit?.setQuota(j.model, j.left), notice: j => step(th, j.text),
-        file: p => { step(th, "Created " + p.replace(/^\//, "")); status.textContent = "Writing files…"; } },
+        file: p => { act(); step(th, "Created " + p.replace(/^\//, "")); status.textContent = "Writing files…"; } },
       onFile: (name, c) => vfs.write(norm(name), c) });
     endThink(); content = r.text; md(out, content || (r.files.length ? "" : "_(no reply)_"), true);
     const fenced = fencedFiles(content).map(f => { if (!/^snippet-/.test(f.name)) vfs.write(norm(f.name), f.content); return { name: norm(f.name), content: f.content }; });
