@@ -3,12 +3,20 @@
 import { isInverted, setInverted, SKY } from "./static.js";
 import { getCompanion, setCompanion, COMPANIONS } from "./companion.js";
 import { openUpgrade } from "./chatkit.js";
-const PN = { hobby: "Hobby", pro: "Pro", max: "Max" }, PM = { hobby: "Quill Wren 1.2 and Quill Scribe 1", pro: "Quill Wren 1.2, Quill Scribe 1 and Quill Sage 1.5", max: "Every model, including Quill Sovereign 0.5" };
+// Share approximate location (rough city from the server's IP lookup) with the model. On by default; when off, chat requests carry no_location: true (date and time are still sent).
+export const getShareLocation = () => localStorage.getItem("lq.shareLocation") !== "0";
+export const setShareLocation = v => localStorage.setItem("lq.shareLocation", v ? "1" : "0");
+(() => { if (window.__lqLocPatch) return; window.__lqLocPatch = true; const of = window.fetch.bind(window);
+  window.fetch = (input, init) => { try { const u = typeof input === "string" ? input : input instanceof URL ? input.href : input?.url || "";
+    if (!getShareLocation() && init && typeof init.body === "string" && /\/api\/chat$/.test(u.split(/[?#]/)[0])) {
+      const j = JSON.parse(init.body); if (j && typeof j === "object" && !Array.isArray(j)) { j.no_location = true; init = { ...init, body: JSON.stringify(j) }; } } } catch {}
+    return of(input, init); }; })();
+const PN = { hobby: "Hobby", pro: "Pro", max: "Max" }, PM = { hobby: "Quill Wren 1.2 and Quill Scribe 1.1", pro: "Quill Wren 1.2, Quill Scribe 1.1 and Quill Sage 1.5", max: "Every model, including Quill Sovereign 0.5" };
 // Current plan (Hobby when signed out), from the LarkquillAI backend.
 async function planRow() { const pb = el("button", "pri", "See plans"); pb.type = "button"; const r = row("Plan", "Loading…", pb); const d = r.querySelector(".d"), t = r.querySelector(".t");
   let plan = "hobby"; pb.onclick = () => openUpgrade(plan === "pro" ? "max" : null);
   try { const tok = localStorage.getItem("wy.token"); const x = await fetch("https://larkquillai.vercel.app/api/billing?action=plan", { headers: tok ? { authorization: "Bearer " + tok } : {} });
-    if (x.ok) { plan = (await x.json()).plan || "hobby"; d.textContent = PM[plan] + ". One-time purchase, tied to your account."; } else { d.textContent = "Quill Wren 1.2 and Quill Scribe 1. Sign in and upgrade for Quill Sage 1.5 and Quill Sovereign 0.4."; } }
+    if (x.ok) { plan = (await x.json()).plan || "hobby"; d.textContent = PM[plan] + ". One-time purchase, tied to your account."; } else { d.textContent = "Quill Wren 1.2 and Quill Scribe 1.1. Sign in and upgrade for Quill Sage 1.5 and Quill Sovereign 0.5."; } }
   catch { d.textContent = "Couldn't load your plan."; }
   t.textContent = "Plan: LarkquillAI " + PN[plan]; pb.textContent = plan === "max" ? "See plans" : plan === "pro" ? "Upgrade to Max" : "Upgrade"; return r; }
 const CSS = `.wy-sl{padding:0;border:1px solid #262626;border-radius:18px;background:#0e0e0e;color:#ececec;width:min(520px,94vw)}
@@ -30,6 +38,7 @@ export function openSettings() {
     (() => { const ph = el("div"); planRow().then(r => ph.replaceWith(r)); return ph; })(),
     (() => { const ak = el("button", "", "API keys"); ak.type = "button"; ak.className = "pri"; ak.onclick = () => window.open(new URL("api.html", location.href).href, "_blank", "noopener");
       return row("API keys", "Create and manage keys for the LarkquillAI developer API, and read the docs.", ak); })(),
+    row("Share approximate location", "Lets the model use your rough city for questions like \"near me\" or local weather. Off: only your date and time are shared.", sw(getShareLocation(), v => setShareLocation(v))),
     ...(SKY ? [] : [row("Inverted theme", "Light background. You can also click the empty background.", sw(isInverted(), v => setInverted(v)))]));
   dlg.append(x, b); document.body.append(dlg); dlg.addEventListener("close", () => dlg.remove()); dlg.showModal();
 }
