@@ -3,8 +3,8 @@
 # and (if Ollama is installed) registers it as larkquill-local:<size>.
 #
 # One-line install (PowerShell):
-#   $env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex
-#   $env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex
+#   $env:LARKQUILL_SIZE='4b'; irm https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.ps1 | iex
+#   $env:LARKQUILL_SIZE='8b'; irm https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.ps1 | iex
 # Or after downloading the script:
 #   $env:LARKQUILL_SIZE='8b'; powershell -ExecutionPolicy Bypass -File install.ps1
 

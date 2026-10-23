@@ -20,18 +20,18 @@ Both are 4-bit (Q4_K_M) GGUF files. They run on the CPU, and faster on Apple Sil
 
 ```sh
 # 4B
-curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 4b
+curl -fsSL https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.sh | sh -s -- 4b
 # 8B
-curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 8b
+curl -fsSL https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.sh | sh -s -- 8b
 ```
 
 **Windows (PowerShell)**
 
 ```powershell
 # 4B
-$env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex
+$env:LARKQUILL_SIZE='4b'; irm https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.ps1 | iex
 # 8B
-$env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex
+$env:LARKQUILL_SIZE='8b'; irm https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.ps1 | iex
 ```
 
 3. Chat:

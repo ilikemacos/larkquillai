@@ -4,8 +4,8 @@
 # and (if Ollama is installed) registers it as larkquill-local:<size>.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 4b
-#   curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 8b
+#   curl -fsSL https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.sh | sh -s -- 4b
+#   curl -fsSL https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.sh | sh -s -- 8b
 #
 # Options (environment variables):
 #   LARKQUILL_DIR   where to keep the model (default: ~/.larkquill/models)
