@@ -22,16 +22,16 @@ h3{font:500 13px var(--lq-sans);color:var(--lq-muted);margin:16px 0 6px}
 <div class="btns"><a class="lq-btn" href="https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf">LM Studio · one file</a><a class="lq-btn lq-ghost" href="https://github.com/ilikemacos/larkquillai/releases/tag/local-v1">GitHub parts</a></div></div>
 <ul class="facts"><li class="lq-chip">2.7 GB · one .gguf</li><li class="lq-chip">8 GB RAM computer</li></ul>
 <h3>LM Studio</h3><p class="note">Click <strong>LM Studio · one file</strong> for a single <code>.gguf</code> download. Import it in LM Studio (My Models → import, or <code>lms import</code>). Paste the LarkquillAI system prompt from the <a href="https://github.com/ilikemacos/larkquillai/tree/models#run-with-lm-studio-one-file-download">model guide</a>.</p>
-<h3>macOS / Linux (Terminal, needs Ollama)</h3><div class="cmd"><code>curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 4b</code><button>Copy</button></div>
-<h3>Windows (PowerShell, needs Ollama)</h3><div class="cmd"><code>$env:LARKQUILL_SIZE='4b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex</code><button>Copy</button></div>
+<h3>macOS / Linux (Terminal, needs Ollama)</h3><div class="cmd"><code>curl -fsSL https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.sh | sh -s -- 4b</code><button>Copy</button></div>
+<h3>Windows (PowerShell, needs Ollama)</h3><div class="cmd"><code>$env:LARKQUILL_SIZE='4b'; irm https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.ps1 | iex</code><button>Copy</button></div>
 <p class="files">Ollama parts (join if downloading by hand): <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-4b-Q4_K_M.gguf.part1">part 1</a> · <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-4b-Q4_K_M.gguf.part2">part 2</a></p></div>
 
 <div class="card"><div class="top"><div><h2>Local <em>8B</em></h2><p>Smarter answers, writing and code. Needs more memory.</p></div>
 <div class="btns"><a class="lq-btn" href="https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF/resolve/main/granite-4.2-8b-Q4_K_M.gguf">LM Studio · one file</a><a class="lq-btn lq-ghost" href="https://github.com/ilikemacos/larkquillai/releases/tag/local-v1">GitHub parts</a></div></div>
 <ul class="facts"><li class="lq-chip">5.3 GB · one .gguf</li><li class="lq-chip">16 GB RAM computer</li></ul>
 <h3>LM Studio</h3><p class="note">Same as 4B: one <code>.gguf</code> file, import in LM Studio, then set the system prompt from the guide.</p>
-<h3>macOS / Linux (Terminal, needs Ollama)</h3><div class="cmd"><code>curl -fsSL https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.sh | sh -s -- 8b</code><button>Copy</button></div>
-<h3>Windows (PowerShell, needs Ollama)</h3><div class="cmd"><code>$env:LARKQUILL_SIZE='8b'; irm https://raw.githubusercontent.com/ilikemacos/larkquillai/models/install/install.ps1 | iex</code><button>Copy</button></div>
+<h3>macOS / Linux (Terminal, needs Ollama)</h3><div class="cmd"><code>curl -fsSL https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.sh | sh -s -- 8b</code><button>Copy</button></div>
+<h3>Windows (PowerShell, needs Ollama)</h3><div class="cmd"><code>$env:LARKQUILL_SIZE='8b'; irm https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.ps1 | iex</code><button>Copy</button></div>
 <p class="files">Ollama parts: <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-8b-Q4_K_M.gguf.part1">part 1</a> · <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-8b-Q4_K_M.gguf.part2">part 2</a> · <a href="https://github.com/ilikemacos/larkquillai/releases/download/local-v1/larkquill-local-8b-Q4_K_M.gguf.part3">part 3</a></p></div>
 
 <h2 style="margin-top:40px">After installing with Ollama</h2><div class="cmd"><code>ollama run larkquill-local:4b</code><button>Copy</button></div>
