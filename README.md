@@ -34,14 +34,18 @@ $env:LARKQUILL_SIZE='4b'; irm https://github.com/ilikemacos/larkquillai/releases
 $env:LARKQUILL_SIZE='8b'; irm https://github.com/ilikemacos/larkquillai/releases/download/local-v1/install.ps1 | iex
 ```
 
-3. Chat:
+3. Run (pick one):
+
+- **Mac:** open `~/LarkquillAI-Local` and double-click `Run LarkquillAI Local 4B.command` (or the 8B one).
+- **Windows:** open `%USERPROFILE%\LarkquillAI-Local` and double-click `Run LarkquillAI Local 4B.bat` (or the 8B one).
+- **Terminal:**
 
 ```sh
 ollama run larkquill-local:4b                 # or larkquill-local:8b
 ollama run larkquill-local:4b --think=false   # faster, direct answers without step-by-step thinking
 ```
 
-The installer downloads the parts from GitHub Releases, checks every SHA256, joins them, and registers the model with Ollama. It needs about 6 GB (4B) or 11 GB (8B) of free disk space while it works. After Ollama imports the model, the installer deletes its own copy; set `LARKQUILL_KEEP_GGUF=1` to keep the `.gguf` for LM Studio or llama.cpp. Files go to `~/.larkquill/models` (Windows: `%USERPROFILE%\.larkquill\models`); set `LARKQUILL_DIR` to change that.
+The installer downloads the parts from GitHub Releases, checks every SHA256, joins them, and registers the model with Ollama. It needs about 6 GB (4B) or 11 GB (8B) of free disk space while it works. Files go in a **visible** folder: `~/LarkquillAI-Local` (Windows: `%USERPROFILE%\LarkquillAI-Local`). Set `LARKQUILL_DIR` to change that. The installer also writes a double-click runner (`Run LarkquillAI Local 4B.command` on Mac, `.bat` on Windows) and keeps the `.gguf` so you can drag it into LM Studio. Set `LARKQUILL_DELETE_GGUF=1` if you want the installer to remove the `.gguf` after Ollama imports it.
 
 ## Manual download
 
@@ -81,27 +85,27 @@ ollama run larkquill-local:8b
 
 The Modelfile sets the LarkquillAI Local system prompt, the chat template and the recommended sampling settings.
 
-## Run with LM Studio (one-file download)
+## Run with LM Studio (drag and drop)
 
-LM Studio needs a single `.gguf`. GitHub Releases caps each file at 2 GB, so the Larkquill-named builds are split there. For LM Studio, download the matching upstream Q4_K_M file in **one click** (same weights; only the display name inside the file differs):
+LM Studio wants **one** `.gguf`. Download it, then **drag the file onto the LM Studio window** (or into My Models). No convert step.
 
-| Model | One-file download |
+| Model | Download (then drag into LM Studio) |
 |---|---|
 | Local 4B | [`Qwen3.5-4B-Q4_K_M.gguf`](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf) (2.74 GB) |
 | Local 8B | [`granite-4.2-8b-Q4_K_M.gguf`](https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF/resolve/main/granite-4.2-8b-Q4_K_M.gguf) (5.35 GB) |
 
-1. Download one of those links (or in LM Studio Discover, paste the Hugging Face model page URL).
-2. Import the `.gguf` (**My Models** → import, or `lms import path/to/file.gguf`).
-3. Load it. LM Studio reads the chat template from the file.
-4. For the LarkquillAI personality, paste this into **System Prompt**:
+1. Click a link above (one file).
+2. **Drag the downloaded `.gguf` into LM Studio.**
+3. Load it and chat. LM Studio reads the chat template from the file.
+4. Optional — for the LarkquillAI personality, paste this into **System Prompt**:
 
    > You are LarkquillAI Local, the offline edition of LarkquillAI. You run entirely on the user's own computer: you have no internet access, cannot browse, and nothing the user types leaves their device. Be warm, clear and concise. Use Markdown when it helps. If you are not sure about something, say so instead of guessing.
 
 5. Suggested settings. 4B: temperature 0.7, top-p 0.8, top-k 20, presence penalty 1.5. 8B: temperature 1.0, top-p 0.95.
 
-In LM Studio and llama.cpp the 8B thinks step by step by default and the 4B answers directly.
+If you already ran the Ollama installer, you can also drag `~/LarkquillAI-Local/4b/larkquill-local-4b-Q4_K_M.gguf` (or the 8B path) into LM Studio — same idea.
 
-If you already joined the GitHub `.partN` files into `larkquill-local-*-Q4_K_M.gguf`, that single file also works in LM Studio.
+In LM Studio and llama.cpp the 8B thinks step by step by default and the 4B answers directly.
 
 ## Run with llama.cpp
 
