@@ -17,7 +17,7 @@ $ProgressPreference = 'SilentlyContinue'
 $Tag  = 'local-v1'
 $Repo = 'ilikemacos/larkquillai'
 $Base = if ($env:LARKQUILL_BASE_URL) { $env:LARKQUILL_BASE_URL } else { "https://github.com/$Repo/releases/download/$Tag" }
-$Raw  = if ($env:LARKQUILL_RAW_URL) { $env:LARKQUILL_RAW_URL } else { "https://raw.githubusercontent.com/$Repo/main" }
+$Raw  = if ($env:LARKQUILL_RAW_URL) { $env:LARKQUILL_RAW_URL } else { '' }  # empty = use release asset
 
 $Models = @{
   '4b' = @{
@@ -91,7 +91,12 @@ if ((Test-Path $File) -and ((ShaOf $File) -eq $M.Sha)) {
   if ($env:LARKQUILL_KEEP_PARTS -ne '1') { Get-ChildItem "$File.part*" | Remove-Item -Force }
 }
 
-Invoke-WebRequest -UseBasicParsing -Uri "$Raw/modelfiles/Modelfile.$Size" -OutFile 'Modelfile'
+if ($Raw) {
+  Invoke-WebRequest -UseBasicParsing -Uri "$Raw/modelfiles/Modelfile.$Size" -OutFile 'Modelfile'
+} else {
+  Invoke-WebRequest -UseBasicParsing -Uri "$Base/Modelfile.$Size" -OutFile 'Modelfile'
+}
+if (-not (Test-Path 'Modelfile')) { Die "Could not download the Modelfile." }
 
 if (Get-Command ollama -ErrorAction SilentlyContinue) {
   Say "Registering with Ollama as larkquill-local:$Size ..."

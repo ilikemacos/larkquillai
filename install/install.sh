@@ -18,7 +18,7 @@ SIZE="${1:-4b}"
 TAG="local-v1"
 REPO="ilikemacos/larkquillai"
 BASE="${LARKQUILL_BASE_URL:-https://github.com/$REPO/releases/download/$TAG}"
-RAW="${LARKQUILL_RAW_URL:-https://raw.githubusercontent.com/$REPO/main}"
+RAW="${LARKQUILL_RAW_URL:-}"  # empty = use release asset; set to a raw base for mirrors
 DIR="${LARKQUILL_DIR:-$HOME/.larkquill/models}/$SIZE"
 
 case "$SIZE" in
@@ -81,7 +81,11 @@ else
   if [ "${LARKQUILL_KEEP_PARTS:-0}" != "1" ]; then rm -f "$FILE".part*; fi
 fi
 
-curl -fsSL -o Modelfile "$RAW/modelfiles/Modelfile.$SIZE" || die "Could not download the Modelfile."
+if [ -n "$RAW" ]; then
+  curl -fsSL -o Modelfile "$RAW/modelfiles/Modelfile.$SIZE" || die "Could not download the Modelfile."
+else
+  curl -fsSL -o Modelfile "$BASE/Modelfile.$SIZE" || die "Could not download the Modelfile."
+fi
 
 if command -v ollama >/dev/null 2>&1; then
   say "Registering with Ollama as larkquill-local:$SIZE ..."

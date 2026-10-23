@@ -81,10 +81,17 @@ ollama run larkquill-local:8b
 
 The Modelfile sets the LarkquillAI Local system prompt, the chat template and the recommended sampling settings.
 
-## Run with LM Studio
+## Run with LM Studio (one-file download)
 
-1. Join the parts as above.
-2. In LM Studio, open **My Models**, then import the `.gguf` (or put it in `~/.lmstudio/models/larkquill/larkquill-local/`).
+LM Studio needs a single `.gguf`. GitHub Releases caps each file at 2 GB, so the Larkquill-named builds are split there. For LM Studio, download the matching upstream Q4_K_M file in **one click** (same weights; only the display name inside the file differs):
+
+| Model | One-file download |
+|---|---|
+| Local 4B | [`Qwen3.5-4B-Q4_K_M.gguf`](https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf) (2.74 GB) |
+| Local 8B | [`granite-4.2-8b-Q4_K_M.gguf`](https://huggingface.co/ibm-granite/granite-4.2-8b-GGUF/resolve/main/granite-4.2-8b-Q4_K_M.gguf) (5.35 GB) |
+
+1. Download one of those links (or in LM Studio Discover, paste the Hugging Face model page URL).
+2. Import the `.gguf` (**My Models** → import, or `lms import path/to/file.gguf`).
 3. Load it. LM Studio reads the chat template from the file.
 4. For the LarkquillAI personality, paste this into **System Prompt**:
 
@@ -93,6 +100,8 @@ The Modelfile sets the LarkquillAI Local system prompt, the chat template and th
 5. Suggested settings. 4B: temperature 0.7, top-p 0.8, top-k 20, presence penalty 1.5. 8B: temperature 1.0, top-p 0.95.
 
 In LM Studio and llama.cpp the 8B thinks step by step by default and the 4B answers directly.
+
+If you already joined the GitHub `.partN` files into `larkquill-local-*-Q4_K_M.gguf`, that single file also works in LM Studio.
 
 ## Run with llama.cpp
 
