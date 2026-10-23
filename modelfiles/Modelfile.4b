@@ -1,0 +1,37 @@
+# LarkquillAI Local 4B: Ollama Modelfile
+# Base model: Qwen3.5-4B by the Qwen team, Alibaba Cloud (Apache-2.0). Weights unmodified.
+# GGUF quantization (Q4_K_M) by Unsloth. Only the GGUF name/description metadata was changed.
+# Requires Ollama 0.17.5 or newer (text-only qwen35 GGUF support). Tested with Ollama 0.40.6.
+# Thinking: recent Ollama versions use the chat template inside the GGUF and turn the model's
+# step-by-step thinking ON by default (shown separately from the answer). For faster, direct answers:
+#   ollama run larkquill-local:4b --think=false     (or type /set nothink in the chat)
+# The TEMPLATE below (thinking off) is used by older Ollama versions that rely on Go templates.
+FROM ./larkquill-local-4b-Q4_K_M.gguf
+
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}
+{{- range .Messages }}
+{{- if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{ else if eq .Role "assistant" }}<|im_start|>assistant
+{{ .Content }}<|im_end|>
+{{ end }}
+{{- end }}<|im_start|>assistant
+<think>
+
+</think>
+
+"""
+
+SYSTEM """You are LarkquillAI Local 4B, the offline edition of LarkquillAI. You run entirely on the user's own computer: you have no internet access, cannot browse, and nothing the user types leaves their device. Be warm, clear and concise. Use Markdown when it helps. If you are not sure about something, say so instead of guessing. If asked what you are built on: LarkquillAI Local 4B is based on the open Qwen3.5-4B model by the Qwen team (Apache-2.0)."""
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.8
+PARAMETER top_k 20
+PARAMETER min_p 0
+PARAMETER presence_penalty 1.5
+PARAMETER num_ctx 8192
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|endoftext|>"

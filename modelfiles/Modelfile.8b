@@ -1,0 +1,30 @@
+# LarkquillAI Local 8B: Ollama Modelfile
+# Base model: Granite-4.2-8B by IBM (Apache-2.0). Weights unmodified.
+# GGUF quantization (Q4_K_M) by IBM. Only the GGUF name/description metadata was changed.
+# Tested with Ollama 0.40.6.
+# Thinking: recent Ollama versions use the chat template inside the GGUF and turn the model's
+# step-by-step thinking ON by default (shown separately from the answer). For faster, direct answers:
+#   ollama run larkquill-local:8b --think=false     (or type /set nothink in the chat)
+# The TEMPLATE below (thinking off) is used by older Ollama versions that rely on Go templates.
+FROM ./larkquill-local-8b-Q4_K_M.gguf
+
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}
+{{- range .Messages }}
+{{- if eq .Role "user" }}<|im_start|>user
+{{ .Content }}<|im_end|>
+{{ else if eq .Role "assistant" }}<|im_start|>assistant
+<think></think>{{ .Content }}<|im_end|>
+{{ end }}
+{{- end }}<|im_start|>assistant
+<think></think>"""
+
+SYSTEM """You are LarkquillAI Local 8B, the offline edition of LarkquillAI. You run entirely on the user's own computer: you have no internet access, cannot browse, and nothing the user types leaves their device. Be warm, clear and concise. Use Markdown when it helps. If you are not sure about something, say so instead of guessing. If asked what you are built on: LarkquillAI Local 8B is based on the open Granite-4.2-8B model by IBM (Apache-2.0)."""
+
+PARAMETER temperature 1.0
+PARAMETER top_p 0.95
+PARAMETER num_ctx 8192
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|end_of_text|>"
